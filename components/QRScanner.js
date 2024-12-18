@@ -5,67 +5,87 @@ const QRScanner = () => {
     const [scanning, setScanning] = React.useState(false);
     const [scannedCodes, setScannedCodes] = React.useState([]);
     const [error, setError] = React.useState(null);
+    const [debug, setDebug] = React.useState(''); // Add debug info
     
-    // References to maintain state between renders
-    const videoRef = React.useRef(null);  // Reference to video element
-    const qrScannerRef = React.useRef(null);  // Reference to QR scanner instance
+    // Reference to our video element
+    const videoRef = React.useRef(null);
 
     // Function to start the QR code scanning process
     const startScanning = async () => {
         try {
             setError(null);
+            setDebug('Starting camera...');
             
-            // Create new QR scanner instance
-            if (!qrScannerRef.current) {
-                qrScannerRef.current = new QrScanner(
-                    videoRef.current,  // Use the video element from our ref
-                    result => {  // Success callback
-                        const newCode = {
-                            data: result.data,
-                            timestamp: new Date().toLocaleString()
-                        };
-                        setScannedCodes(prev => [...prev, newCode]);
-                        // Don't stop scanning automatically - let user decide
-                    },
-                    {
-                        returnDetailedScanResult: true,
-                        highlightScanRegion: true,  // Show scanning region
-                        highlightCodeOutline: true, // Show detected QR code outline
-                    }
-                );
+            // Request camera access explicitly first
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'environment' }
+            });
+            
+            // Ensure we have a video element
+            if (!videoRef.current) {
+                setError('No video element found!');
+                return;
             }
 
-            await qrScannerRef.current.start();
+            // Connect the stream to the video element
+            videoRef.current.srcObject = stream;
+            videoRef.current.play();
+            
+            setDebug('Camera started, initializing QR scanner...');
+            
+            // Create and start QR scanner
+            const qrScanner = new QrScanner(
+                videoRef.current,
+                result => {
+                    setDebug('QR Code detected: ' + result.data);
+                    const newCode = {
+                        data: result.data,
+                        timestamp: new Date().toLocaleString()
+                    };
+                    setScannedCodes(prev => [...prev, newCode]);
+                },
+                {
+                    returnDetailedScanResult: true,
+                    highlightScanRegion: true,
+                    highlightCodeOutline: true,
+                }
+            );
+
+            await qrScanner.start();
+            setDebug('QR scanner started');
             setScanning(true);
 
         } catch (err) {
-            console.error('Scanning error:', err);
-            setError('Error accessing camera: ' + err.message);
+            console.error('Scanner error:', err);
+            setError('Error: ' + err.message);
+            setDebug('Error occurred: ' + err.message);
             setScanning(false);
         }
     };
 
     // Function to stop the QR scanner
     const stopScanning = () => {
-        if (qrScannerRef.current) {
-            qrScannerRef.current.stop();
+        try {
+            if (videoRef.current && videoRef.current.srcObject) {
+                const tracks = videoRef.current.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+                videoRef.current.srcObject = null;
+            }
+            setScanning(false);
+            setDebug('Scanning stopped');
+        } catch (err) {
+            setError('Error stopping scanner: ' + err.message);
         }
-        setScanning(false);
     };
 
-    // Cleanup when component unmounts
+    // Cleanup on unmount
     React.useEffect(() => {
         return () => {
-            if (qrScannerRef.current) {
-                qrScannerRef.current.stop();
+            if (scanning) {
+                stopScanning();
             }
         };
-    }, []);
-
-    // Function to clear all scanned codes from history
-    const clearScannedCodes = () => {
-        setScannedCodes([]);
-    };
+    }, [scanning]);
 
     return (
         <div className="max-w-2xl mx-auto p-4">
@@ -77,43 +97,54 @@ const QRScanner = () => {
                 </div>
 
                 <div className="p-4">
+                    {/* Debug info */}
+                    <div className="mb-4 p-2 bg-gray-100 text-sm">
+                        Status: {scanning ? 'Active' : 'Inactive'}<br />
+                        Debug: {debug}
+                    </div>
+
+                    {/* Error display */}
                     {error && (
                         <div className="mb-4 p-4 bg-red-50 text-red-700 rounded">
                             {error}
                         </div>
                     )}
 
+                    {/* Camera controls */}
                     <div className="space-y-4">
                         <div className="flex gap-2">
                             <button 
                                 onClick={scanning ? stopScanning : startScanning}
-                                className={`px-4 py-2 rounded font-medium ${scanning ? 
-                                    'bg-red-500 text-white' : 
-                                    'bg-blue-500 text-white'}`}
+                                className={`px-4 py-2 rounded font-medium ${
+                                    scanning ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
+                                }`}
                             >
-                                {scanning ? 'Stop Scanning' : 'Start Scanning'}
+                                {scanning ? 'Stop Camera' : 'Start Camera'}
                             </button>
-                            {scannedCodes.length > 0 && (
-                                <button 
-                                    onClick={clearScannedCodes}
-                                    className="px-4 py-2 rounded font-medium border border-gray-300"
-                                >
-                                    Clear History
-                                </button>
-                            )}
                         </div>
 
-                        {/* Camera view - always present but hidden when not scanning */}
-                        <div className={`relative aspect-video bg-gray-100 rounded-lg overflow-hidden ${!scanning ? 'hidden' : ''}`}>
+                        {/* Camera view - using explicit dimensions and border */}
+                        <div className="relative border-2 border-blue-500 bg-gray-100 rounded-lg overflow-hidden" 
+                             style={{height: '300px'}}>
                             <video 
                                 ref={videoRef}
                                 className="absolute inset-0 w-full h-full object-cover"
+                                playsInline
+                                muted
+                                autoPlay
                             />
                         </div>
 
+                        {/* Scan history */}
                         {scannedCodes.length > 0 && (
                             <div className="mt-4">
                                 <h3 className="text-lg font-semibold mb-2">Scan History</h3>
+                                <button 
+                                    onClick={() => setScannedCodes([])}
+                                    className="px-4 py-2 rounded font-medium border border-gray-300 mb-2"
+                                >
+                                    Clear History
+                                </button>
                                 <div className="space-y-2">
                                     {scannedCodes.map((code, index) => (
                                         <div 
