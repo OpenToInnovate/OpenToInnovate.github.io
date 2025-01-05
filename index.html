@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Scanner</title>
     
-    <!-- React -->
-    <script src="https://unpkg.com/react@18/umd/react.development.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.min.js"></script>
+    <!-- React (using production versions from official CDN) -->
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     
     <!-- Babel -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone@7.22.17/babel.min.js"></script>
     
     <!-- QR Scanner -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,25 +36,34 @@
             }, []);
 
             const startScanning = () => {
-                const html5QrcodeScanner = new Html5QrcodeScanner(
-                    "qr-reader", { fps: 10, qrbox: 250 }
-                );
+                const html5QrcodeScanner = new Html5Qrcode("qr-reader");
                 
-                html5QrcodeScanner.render((decodedText) => {
-                    // Add new scan if it's unique
-                    setScannedCodes(prevCodes => {
-                        if (!prevCodes.some(code => code.data === decodedText)) {
-                            const newCodes = [...prevCodes, {
-                                id: Date.now(),
-                                data: decodedText,
-                                timestamp: new Date().toLocaleString()
-                            }];
-                            localStorage.setItem('scannedCodes', JSON.stringify(newCodes));
-                            return newCodes;
-                        }
-                        return prevCodes;
-                    });
-                });
+                html5QrcodeScanner.start(
+                    { facingMode: "environment" },
+                    {
+                        fps: 10,
+                        qrbox: { width: 250, height: 250 }
+                    },
+                    (decodedText) => {
+                        // Add new scan if it's unique
+                        setScannedCodes(prevCodes => {
+                            if (!prevCodes.some(code => code.data === decodedText)) {
+                                const newCodes = [...prevCodes, {
+                                    id: Date.now(),
+                                    data: decodedText,
+                                    timestamp: new Date().toLocaleString()
+                                }];
+                                localStorage.setItem('scannedCodes', JSON.stringify(newCodes));
+                                return newCodes;
+                            }
+                            return prevCodes;
+                        });
+                    },
+                    (error) => {
+                        // Handle scan error
+                        console.warn(error);
+                    }
+                );
                 setScanning(true);
             };
 
@@ -66,7 +75,7 @@
                         {!scanning && (
                             <button 
                                 onClick={startScanning}
-                                className="bg-blue-500 text-white px-4 py-2 rounded"
+                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                             >
                                 Start Scanning
                             </button>
