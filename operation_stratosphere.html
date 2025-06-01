@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Mirrors: Climate Defense Arcade</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: #000;
+            color: #00ff00;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(180deg, #000011 0%, #001122 50%, #002244 100%);
+        }
+
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 100;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .hud-item {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .temp-critical { color: #ff0000; border-color: #ff0000; }
+        .temp-warning { color: #ffff00; border-color: #ffff00; }
+        .temp-good { color: #00ff00; border-color: #00ff00; }
+
+        .game-canvas {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 80% 20%, #ffff00 2%, transparent 3%),
+                        radial-gradient(circle at 10% 80%, #0099ff 1%, transparent 2%),
+                        #000011;
+            cursor: crosshair;
+        }
+
+        .start-screen, .game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+
+        .title {
+            font-size: 4rem;
+            font-weight: 900;
+            color: #00ffff;
+            text-shadow: 0 0 30px #00ffff;
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 30px #00ffff; }
+            to { text-shadow: 0 0 50px #00ffff, 0 0 60px #0088ff; }
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #ffff00;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .instructions {
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            color: #cccccc;
+        }
+
+        .controls {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ff00, #00aa00);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', monospace;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, #00ffff, #0088ff);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .ship {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #00ffff, #ffffff);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            transition: all 0.1s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+            z-index: 50;
+        }
+
+        .bubble {
+            position: absolute;
+            border: 3px solid #00ffff;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, rgba(0, 255, 255, 0.05) 100%);
+            animation: bubblePulse 1s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+
+        @keyframes bubblePulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .solar-ray {
+            position: absolute;
+            background: linear-gradient(90deg, #ffff00, #ff8800);
+            height: 4px;
+            border-radius: 2px;
+            box-shadow: 0 0 10px #ffff00;
+            animation: rayMove 3s linear infinite;
+        }
+
+        @keyframes rayMove {
+            from { transform: translateX(0); }
+            to { transform: translateX(-100vw); }
+        }
+
+        .solar-flare {
+            position: absolute;
+            background: radial-gradient(circle, #ff0000, #ff8800);
+            border-radius: 50%;
+            box-shadow: 0 0 30px #ff0000;
+            animation: flareMove 4s linear infinite;
+        }
+
+        @keyframes flareMove {
+            from { transform: translateX(0) translateY(0); }
+            to { transform: translateX(-100vw) translateY(100px); }
+        }
+
+        .powerup {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            animation: powerupFloat 2s ease-in-out infinite, powerupMove 6s linear infinite;
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .powerup-speed { background: #00ff00; }
+        .powerup-shield { background: #0088ff; }
+        .powerup-multi { background: #ff00ff; }
+
+        @keyframes powerupFloat {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-10px) scale(1.2); }
+        }
+
+        @keyframes powerupMove {
+            from { left: 100vw; }
+            to { left: -50px; }
+        }
+
+        .explosion {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ffff00 0%, #ff8800 30%, #ff0000 70%, transparent 100%);
+            border-radius: 50%;
+            animation: explode 0.5s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: particleFloat 2s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes particleFloat {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0) translateY(-100px); }
+        }
+
+        .earth {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20vw;
+            height: 100vh;
+            background: 
+                /* Cloud formations */
+                radial-gradient(ellipse at 15% 20%, rgba(255,255,255,0.4) 3%, transparent 8%),
+                radial-gradient(ellipse at 12% 35%, rgba(255,255,255,0.3) 2%, transparent 6%),
+                radial-gradient(ellipse at 18% 55%, rgba(255,255,255,0.35) 2.5%, transparent 7%),
+                radial-gradient(ellipse at 10% 75%, rgba(255,255,255,0.3) 2%, transparent 5%),
+                radial-gradient(ellipse at 16% 85%, rgba(255,255,255,0.25) 1.5%, transparent 4%),
+                
+                /* Landmasses - continents */
+                radial-gradient(ellipse at 8% 25%, #228B22 8%, transparent 15%),
+                radial-gradient(ellipse at 12% 40%, #8B4513 6%, transparent 12%),
+                radial-gradient(ellipse at 15% 60%, #228B22 7%, transparent 14%),
+                radial-gradient(ellipse at 6% 70%, #8B4513 5%, transparent 10%),
+                radial-gradient(ellipse at 14% 80%, #228B22 4%, transparent 8%),
+                
+                /* Ocean base with depth variation */
+                linear-gradient(180deg, #4169E1 0%, #1E90FF 30%, #006994 70%, #003d5c 100%);
+            
+            border-radius: 0; /* Remove circular border */
+            box-shadow: 
+                inset 5px 0 30px rgba(0, 0, 0, 0.4), /* Left shadow for curvature effect */
+                0 0 50px rgba(30, 144, 255, 0.6); /* Atmospheric glow */
+            animation: earthRotate 25s linear infinite;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .earth::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                /* Atmospheric layers */
+                linear-gradient(90deg, 
+                    rgba(135, 206, 235, 0.8) 0%, 
+                    rgba(135, 206, 235, 0.4) 15%, 
+                    rgba(135, 206, 235, 0.2) 30%, 
+                    transparent 50%),
+                /* Day/night terminator effect */
+                linear-gradient(180deg, 
+                    rgba(255, 200, 100, 0.1) 0%,
+                    transparent 20%,
+                    transparent 80%,
+                    rgba(0, 20, 60, 0.3) 100%);
+            animation: atmospherePulse 4s ease-in-out infinite alternate;
+        }
+
+        /* Add surface detail animation */
+        .earth::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 120%;
+            height: 100%;
+            background: 
+                /* Moving cloud shadows */
+                radial-gradient(ellipse at 10% 30%, rgba(0,0,0,0.1) 2%, transparent 6%),
+                radial-gradient(ellipse at 25% 50%, rgba(0,0,0,0.08) 3%, transparent 8%),
+                radial-gradient(ellipse at 5% 70%, rgba(0,0,0,0.12) 2.5%, transparent 7%);
+            animation: cloudDrift 30s linear infinite;
+        }
+
+        @keyframes earthRotate {
+            from { background-position: 0% 0%; }
+            to { background-position: 100% 0%; }
+        }
+
+        @keyframes atmospherePulse {
+            from { opacity: 0.8; }
+            to { opacity: 1; }
+        }
+
+        @keyframes cloudDrift {
+            from { transform: translateX(-20%); }
+            to { transform: translateX(0%); }
+        }
+
+        .score-popup {
+            position: absolute;
+            color: #ffff00;
+            font-weight: bold;
+            pointer-events: none;
+            animation: scorePopup 1s ease-out forwards;
+            z-index: 60;
+        }
+
+        @keyframes scorePopup {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+        }
+
+        .wave-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 0 0 20px #ffff00;
+            animation: waveAnnounce 2s ease-out forwards;
+            z-index: 150;
+        }
+
+        @keyframes waveAnnounce {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .combo-indicator {
+            position: absolute;
+            top: 150px;
+            right: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff00ff;
+            text-shadow: 0 0 15px #ff00ff;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 2.5rem; }
+            .hud { font-size: 14px; gap: 10px; }
+            .ship { width: 30px; height: 30px; }
+            
+            .earth {
+                width: 25vw; /* Slightly wider on mobile for better visibility */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .earth {
+                width: 30vw; /* Even wider on small phones */
+            }
+        }
+
+        .educational-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 300;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .educational-popup.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup-content {
+            background: linear-gradient(135deg, #001122 0%, #002244 50%, #003366 100%);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            max-width: 700px;
+            width: 85%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.5);
+            transform: scale(0.8);
+            transition: transform 0.6s ease-out;
+            margin: 20px;
+        }
+
+        .educational-popup.show .popup-content {
+            transform: scale(1);
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            border-bottom: 2px solid #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .popup-title {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #00ffff;
+            text-shadow: 0 0 20px #00ffff;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .close-btn {
+            background: none;
+            border: 2px solid #ff4444;
+            color: #ff4444;
+            font-size: 1.5rem;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', monospace;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: #ff4444;
+            color: #000;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
+            transform: scale(1.1);
+        }
+
+        .popup-body {
+            padding: 25px;
+        }
+
+        .science-text {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #cccccc;
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .science-highlight {
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .popup-footer {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .secondary-btn {
+            background: linear-gradient(45deg, #666666, #999999);
+            color: #ffffff;
+        }
+
+        .secondary-btn:hover {
+            background: linear-gradient(45deg, #888888, #bbbbbb);
+            box-shadow: 0 0 20px rgba(136, 136, 136, 0.5);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInScale {
+            from { 
+                opacity: 0; 
+                transform: scale(0.8);
+            }
+            to { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .popup-content {
+                width: 95%;
+                max-width: none;
+                margin: 15px;
+                max-height: 90vh;
+            }
+            
+            .popup-title {
+                font-size: 1.3rem;
+            }
+            
+            .popup-header {
+                padding: 12px 20px;
+            }
+            
+            .popup-body {
+                padding: 20px;
+            }
+            
+            .science-text {
+                font-size: 0.95rem;
+                line-height: 1.6;
+                margin-bottom: 15px;
+            }
+            
+            .popup-footer {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .btn, .secondary-btn {
+                width: 180px;
+                margin: 5px 0;
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+
+            .close-btn {
+                width: 30px;
+                height: 30px;
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .popup-content {
+                width: 98%;
+                margin: 10px;
+                max-height: 95vh;
+            }
+            
+            .popup-title {
+                font-size: 1.1rem;
+                letter-spacing: 0.5px;
+            }
+            
+            .popup-header {
+                padding: 10px 15px;
+            }
+            
+            .popup-body {
+                padding: 15px;
+            }
+            
+            .science-text {
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="start-screen" id="startScreen">
+            <h1 class="title">SPACE MIRRORS</h1>
+            <p class="subtitle">Climate Defense Arcade</p>
+            <div class="instructions">
+                <p>Earth is overheating! Deploy reflective satellites to deflect deadly solar radiation.</p>
+                <br>
+                <div class="controls">
+                    <p><strong>CONTROLS:</strong></p>
+                    <p>🚀 MOUSE/WASD - Move Ship</p>
+                    <p>🔴 CLICK/SPACE - Deploy Bubble Satellite</p>
+                    <p>⚡ Collect Power-ups for special abilities!</p>
+                    <p>🔊 Enable sound for the full experience!</p>
+                </div>
+                <p>Survive the solar storms and cool the planet!</p>
+            </div>
+            <button class="btn" onclick="startGame()">START MISSION</button>
+        </div>
+
+        <div class="game-over-screen" id="gameOverScreen" style="display: none;">
+            <h1 class="title">MISSION COMPLETE</h1>
+            <p class="subtitle" id="finalMessage">Earth Saved!</p>
+            <div id="finalStats" class="instructions"></div>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+                <button class="btn" onclick="startGame()">PLAY AGAIN</button>
+                <button class="btn secondary-btn" onclick="showEducationalPopup()">LEARN MORE</button>
+            </div>
+        </div>
+
+        <div class="educational-popup" id="educationalPopup" style="display: none;">
+            <div class="popup-content">
+                <div class="popup-header">
+                    <h2 class="popup-title">THE SCIENCE BEHIND THE GAME</h2>
+                    <button class="close-btn" onclick="closeEducationalPopup()">&times;</button>
+                </div>
+                <div class="popup-body">
+                    <p class="science-text">
+                        The <span class="science-highlight">space mirrors</span> you used in the game are based on a real idea that scientists are studying! When Earth gets too hot from the Sun, we need to find ways to cool it down.
+                    </p>
+                    <p class="science-text">
+                        Think of it like holding up a <span class="science-highlight">giant umbrella in space</span>. Scientists want to put huge, super-thin mirrors between Earth and the Sun - about a million miles away from us. These mirrors would be like putting on sunglasses for our whole planet!
+                    </p>
+                    <p class="science-text">
+                        Just like how an umbrella blocks some sunlight and keeps you cooler on a hot day, these <span class="science-highlight">space mirrors would block a tiny bit of sunlight</span> before it reaches Earth. This could help make our planet a little cooler and fight against global warming.
+                    </p>
+                    <p class="science-text">
+                        Right now, this is just an idea that smart people are thinking about. But it shows how humans are trying to come up with <span class="science-highlight">creative solutions</span> to help take care of our planet Earth!
+                    </p>
+                    <div class="popup-footer">
+                        <button class="btn secondary-btn" onclick="closeEducationalPopup()">CLOSE</button>
+                        <button class="btn" onclick="startGame(); closeEducationalPopup();">PLAY AGAIN</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hud">
+            <div class="hud-item temp-good" id="tempHud">
+                TEMP: +1.2°C
+            </div>
+            <div class="hud-item">
+                SCORE: <span id="score">0</span>
+            </div>
+            <div class="hud-item">
+                WAVE: <span id="wave">1</span>
+            </div>
+        </div>
+
+        <div class="combo-indicator" id="comboIndicator" style="display: none;"></div>
+
+        <canvas class="game-canvas" id="gameCanvas"></canvas>
+        
+        <div class="earth"></div>
+    </div>
+
+    <script>
+        class SpaceBubblesArcade {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                
+                // Initialize audio context
+                this.audioContext = null;
+                this.sounds = {};
+                this.initAudio();
+                
+                // Delta timing
+                this.lastTime = 0;
+                this.deltaTime = 0;
+                this.targetFPS = 60;
+                this.targetFrameTime = 1000 / this.targetFPS; // 16.67ms for 60fps
+                
+                this.gameState = {
+                    playing: false,
+                    score: 0,
+                    temperature: 1.2,
+                    wave: 1,
+                    lives: 3,
+                    ship: { x: 200, y: window.innerHeight / 2, speed: 300 }, // pixels per second
+                    bubbles: [],
+                    solarRays: [],
+                    solarFlares: [],
+                    powerups: [],
+                    particles: [],
+                    explosions: [],
+                    keys: {},
+                    mouse: { x: 0, y: 0, down: false },
+                    lastShot: 0,
+                    shotCooldown: 200, // milliseconds
+                    powerupEffects: {
+                        speed: 0,
+                        shield: 0,
+                        multiShot: 0
+                    },
+                    combo: 0,
+                    comboTimer: 0,
+                    waveTimer: 0,
+                    difficulty: 1,
+                    gameTime: 0 // Total game time in milliseconds
+                };
+                
+                this.init();
+            }
+            
+            initAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Create a master gain node for volume control
+                    this.masterGain = this.audioContext.createGain();
+                    this.masterGain.gain.value = 0.3; // Master volume
+                    this.masterGain.connect(this.audioContext.destination);
+                    
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+            
+            playSound(type, frequency = 440, duration = 0.2, volume = 0.5) {
+                if (!this.audioContext) return;
+                
+                // Resume audio context if suspended (browser policy)
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                const filter = this.audioContext.createBiquadFilter();
+                
+                oscillator.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(this.masterGain);
+                
+                const now = this.audioContext.currentTime;
+                
+                switch(type) {
+                    case 'bubbleShoot':
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(600, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+                        filter.type = 'lowpass';
+                        filter.frequency.value = 2000;
+                        gainNode.gain.setValueAtTime(0.3, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                        duration = 0.1;
+                        break;
+                        
+                    case 'explosion':
+                        oscillator.type = 'sawtooth';
+                        oscillator.frequency.setValueAtTime(200, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(50, now + 0.3);
+                        filter.type = 'highpass';
+                        filter.frequency.value = 100;
+                        gainNode.gain.setValueAtTime(0.6, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                        duration = 0.3;
+                        break;
+                        
+                    case 'solarRay':
+                        oscillator.type = 'square';
+                        oscillator.frequency.setValueAtTime(150, now);
+                        oscillator.frequency.linearRampToValueAtTime(120, now + 0.5);
+                        filter.type = 'bandpass';
+                        filter.frequency.value = 200;
+                        gainNode.gain.setValueAtTime(0.2, now);
+                        gainNode.gain.linearRampToValueAtTime(0.01, now + 0.5);
+                        duration = 0.5;
+                        break;
+                        
+                    case 'solarFlare':
+                        oscillator.type = 'triangle';
+                        oscillator.frequency.setValueAtTime(80, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(300, now + 0.2);
+                        oscillator.frequency.exponentialRampToValueAtTime(60, now + 0.4);
+                        filter.type = 'lowpass';
+                        filter.frequency.value = 800;
+                        gainNode.gain.setValueAtTime(0.4, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                        duration = 0.4;
+                        break;
+                        
+                    case 'powerup':
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(400, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+                        oscillator.frequency.exponentialRampToValueAtTime(600, now + 0.2);
+                        filter.type = 'lowpass';
+                        filter.frequency.value = 3000;
+                        gainNode.gain.setValueAtTime(0.4, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                        duration = 0.2;
+                        break;
+                        
+                    case 'warning':
+                        oscillator.type = 'square';
+                        oscillator.frequency.setValueAtTime(800, now);
+                        filter.type = 'highpass';
+                        filter.frequency.value = 600;
+                        gainNode.gain.setValueAtTime(0.3, now);
+                        gainNode.gain.setValueAtTime(0.01, now + 0.05);
+                        gainNode.gain.setValueAtTime(0.3, now + 0.1);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                        duration = 0.15;
+                        break;
+                        
+                    case 'thrust':
+                        oscillator.type = 'sawtooth';
+                        oscillator.frequency.setValueAtTime(60, now);
+                        oscillator.frequency.linearRampToValueAtTime(80, now + 0.1);
+                        filter.type = 'lowpass';
+                        filter.frequency.value = 200;
+                        gainNode.gain.setValueAtTime(0.1, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                        duration = 0.1;
+                        break;
+                        
+                    case 'gameOver':
+                        oscillator.type = 'triangle';
+                        oscillator.frequency.setValueAtTime(300, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(150, now + 1.0);
+                        filter.type = 'lowpass';
+                        filter.frequency.value = 1000;
+                        gainNode.gain.setValueAtTime(0.5, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+                        duration = 1.0;
+                        break;
+                        
+                    case 'success':
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(400, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(600, now + 0.2);
+                        oscillator.frequency.exponentialRampToValueAtTime(800, now + 0.4);
+                        filter.type = 'lowpass';
+                        filter.frequency.value = 4000;
+                        gainNode.gain.setValueAtTime(0.4, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                        duration = 0.4;
+                        break;
+                        
+                    default:
+                        oscillator.type = 'sine';
+                        oscillator.frequency.value = frequency;
+                        gainNode.gain.setValueAtTime(volume, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration);
+                }
+                
+                oscillator.start(now);
+                oscillator.stop(now + duration);
+            }
+            
+            playAmbientSpace() {
+                if (!this.audioContext) return;
+                
+                // Low frequency ambient hum
+                const oscillator1 = this.audioContext.createOscillator();
+                const oscillator2 = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                const filter = this.audioContext.createBiquadFilter();
+                
+                oscillator1.type = 'sine';
+                oscillator1.frequency.value = 40;
+                oscillator2.type = 'triangle';
+                oscillator2.frequency.value = 60;
+                
+                filter.type = 'lowpass';
+                filter.frequency.value = 200;
+                
+                gainNode.gain.value = 0.05;
+                
+                oscillator1.connect(filter);
+                oscillator2.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(this.masterGain);
+                
+                oscillator1.start();
+                oscillator2.start();
+                
+                // Store reference to stop later
+                this.ambientOscillators = [oscillator1, oscillator2];
+            }
+            
+            stopAmbientSpace() {
+                if (this.ambientOscillators) {
+                    this.ambientOscillators.forEach(osc => {
+                        try { osc.stop(); } catch(e) {}
+                    });
+                    this.ambientOscillators = null;
+                }
+            }
+            
+            init() {
+                this.bindEvents();
+                this.setupCanvas();
+                this.gameLoop();
+            }
+            
+            bindEvents() {
+                // Keyboard controls
+                document.addEventListener('keydown', (e) => {
+                    this.gameState.keys[e.code] = true;
+                    if (e.code === 'Space' && this.gameState.playing) {
+                        e.preventDefault();
+                        this.shootBubble();
+                    }
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.gameState.keys[e.code] = false;
+                });
+                
+                // Mouse controls
+                this.canvas.addEventListener('mousemove', (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    this.gameState.mouse.x = e.clientX - rect.left;
+                    this.gameState.mouse.y = e.clientY - rect.top;
+                });
+                
+                this.canvas.addEventListener('mousedown', (e) => {
+                    this.gameState.mouse.down = true;
+                    if (this.gameState.playing) {
+                        this.shootBubble();
+                    }
+                });
+                
+                this.canvas.addEventListener('mouseup', () => {
+                    this.gameState.mouse.down = false;
+                });
+                
+                // Resize handler
+                window.addEventListener('resize', () => {
+                    this.canvas.width = window.innerWidth;
+                    this.canvas.height = window.innerHeight;
+                });
+            }
+            
+            setupCanvas() {
+                this.ctx.imageSmoothingEnabled = false; // Pixel art style
+            }
+            
+            startGame() {
+                this.gameState = {
+                    playing: true,
+                    score: 0,
+                    temperature: 1.8,
+                    wave: 1,
+                    lives: 3,
+                    ship: { x: 200, y: window.innerHeight / 2, speed: 300 },
+                    bubbles: [],
+                    solarRays: [],
+                    solarFlares: [],
+                    powerups: [],
+                    particles: [],
+                    explosions: [],
+                    keys: {},
+                    mouse: { x: 0, y: 0, down: false },
+                    lastShot: 0,
+                    shotCooldown: 200,
+                    powerupEffects: {
+                        speed: 0,
+                        shield: 0,
+                        multiShot: 0
+                    },
+                    combo: 0,
+                    comboTimer: 0,
+                    waveTimer: 0,
+                    difficulty: 1,
+                    gameTime: 0
+                };
+                
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('gameOverScreen').style.display = 'none';
+                
+                this.showWaveIndicator();
+                this.playAmbientSpace();
+            }
+            
+            shootBubble() {
+                const now = Date.now();
+                if (now - this.gameState.lastShot < this.gameState.shotCooldown) return;
+                
+                this.gameState.lastShot = now;
+                this.playSound('bubbleShoot');
+                
+                const ship = this.gameState.ship;
+                const bubble = {
+                    x: ship.x + 30,
+                    y: ship.y,
+                    size: 40,
+                    life: 5000, // 5 seconds in milliseconds
+                    maxLife: 5000,
+                    effectiveness: 0.02,
+                    sparkles: []
+                };
+                
+                // Create initial sparkles around bubble
+                for (let i = 0; i < 8; i++) {
+                    bubble.sparkles.push({
+                        angle: (i / 8) * Math.PI * 2,
+                        distance: 25,
+                        life: 1000, // 1 second in milliseconds
+                        speed: 0.5
+                    });
+                }
+                
+                this.gameState.bubbles.push(bubble);
+                
+                // Multi-shot powerup
+                if (this.gameState.powerupEffects.multiShot > 0) {
+                    const bubble2 = {
+                        x: ship.x + 30,
+                        y: ship.y - 40,
+                        size: 30,
+                        life: 4000, // 4 seconds
+                        maxLife: 4000,
+                        effectiveness: 0.015,
+                        sparkles: []
+                    };
+                    const bubble3 = {
+                        x: ship.x + 30,
+                        y: ship.y + 40,
+                        size: 30,
+                        life: 4000, // 4 seconds
+                        maxLife: 4000,
+                        effectiveness: 0.015,
+                        sparkles: []
+                    };
+                    
+                    // Add sparkles to multi-shot bubbles
+                    [bubble2, bubble3].forEach(b => {
+                        for (let i = 0; i < 6; i++) {
+                            b.sparkles.push({
+                                angle: (i / 6) * Math.PI * 2,
+                                distance: 20,
+                                life: 800, // 0.8 seconds
+                                speed: 0.4
+                            });
+                        }
+                    });
+                    
+                    this.gameState.bubbles.push(bubble2, bubble3);
+                }
+                
+                this.createParticles(ship.x + 30, ship.y, '#00ffff', 8);
+            }
+            
+            updateShip() {
+                const ship = this.gameState.ship;
+                const baseSpeed = ship.speed + (this.gameState.powerupEffects.speed > 0 ? 180 : 0); // pixels per second
+                const speed = baseSpeed * (this.deltaTime / 1000); // Convert to pixels per frame
+                
+                let moving = false;
+                
+                // Keyboard movement
+                if (this.gameState.keys['KeyW'] || this.gameState.keys['ArrowUp']) {
+                    ship.y = Math.max(0, ship.y - speed);
+                    moving = true;
+                }
+                if (this.gameState.keys['KeyS'] || this.gameState.keys['ArrowDown']) {
+                    ship.y = Math.min(this.canvas.height, ship.y + speed);
+                    moving = true;
+                }
+                if (this.gameState.keys['KeyA'] || this.gameState.keys['ArrowLeft']) {
+                    ship.x = Math.max(0, ship.x - speed);
+                    moving = true;
+                }
+                if (this.gameState.keys['KeyD'] || this.gameState.keys['ArrowRight']) {
+                    ship.x = Math.min(this.canvas.width - 40, ship.x + speed);
+                    moving = true;
+                }
+                
+                // Mouse movement (smoother)
+                const dx = this.gameState.mouse.x - ship.x;
+                const dy = this.gameState.mouse.y - ship.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance > 5) {
+                    const mouseSpeed = Math.min(speed, distance * 0.1 * (this.deltaTime / 16.67)); // Smooth approach
+                    ship.x += (dx / distance) * mouseSpeed;
+                    ship.y += (dy / distance) * mouseSpeed;
+                    moving = true;
+                }
+                
+                // Play thrust sound occasionally when moving
+                if (moving && Math.random() < 0.05) {
+                    this.playSound('thrust');
+                }
+            }
+            
+            spawnSolarRays() {
+                // Normalize spawn rates to be time-based rather than frame-based
+                const spawnChancePerSecond = 0.5 + this.gameState.difficulty * 0.25; // rays per second
+                const raySpawnChance = spawnChancePerSecond * (this.deltaTime / 1000);
+                
+                if (Math.random() < raySpawnChance) {
+                    this.gameState.solarRays.push({
+                        x: this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        width: 100 + Math.random() * 200,
+                        speed: 120 + this.gameState.difficulty * 60, // pixels per second
+                        damage: 0.1
+                    });
+                    this.playSound('solarRay');
+                }
+                
+                // Solar flares (more dangerous)
+                const flareSpawnChancePerSecond = 0.1 + this.gameState.difficulty * 0.05; // flares per second
+                const flareSpawnChance = flareSpawnChancePerSecond * (this.deltaTime / 1000);
+                
+                if (Math.random() < flareSpawnChance) {
+                    this.gameState.solarFlares.push({
+                        x: this.canvas.width,
+                        y: Math.random() * (this.canvas.height - 100),
+                        size: 30 + Math.random() * 40,
+                        speed: 90 + this.gameState.difficulty * 30, // pixels per second
+                        damage: 0.3,
+                        angle: (Math.random() - 0.5) * 0.5
+                    });
+                    this.playSound('solarFlare');
+                }
+            }
+            
+            spawnPowerups() {
+                const powerupSpawnChancePerSecond = 0.08; // powerups per second
+                const powerupSpawnChance = powerupSpawnChancePerSecond * (this.deltaTime / 1000);
+                
+                if (Math.random() < powerupSpawnChance) {
+                    const types = ['speed', 'shield', 'multi'];
+                    const type = types[Math.floor(Math.random() * types.length)];
+                    
+                    this.gameState.powerups.push({
+                        x: this.canvas.width,
+                        y: Math.random() * (this.canvas.height - 100) + 50,
+                        type: type,
+                        speed: 120, // pixels per second
+                        size: 25
+                    });
+                }
+            }
+            
+            updateGameObjects() {
+                // Update bubbles with fancy effects
+                this.gameState.bubbles = this.gameState.bubbles.filter(bubble => {
+                    bubble.life -= this.deltaTime;
+                    bubble.size += 0.3 * (this.deltaTime / 16.67); // Bubbles expand over time
+                    
+                    // Update sparkles around bubble
+                    bubble.sparkles = bubble.sparkles.filter(sparkle => {
+                        sparkle.life -= this.deltaTime;
+                        sparkle.angle += sparkle.speed * 0.1 * (this.deltaTime / 16.67);
+                        sparkle.distance += Math.sin(sparkle.life * 0.002) * 0.5 * (this.deltaTime / 16.67);
+                        return sparkle.life > 0;
+                    });
+                    
+                    // Add new sparkles periodically
+                    const sparkleSpawnChance = 0.3 * (this.deltaTime / 16.67);
+                    if (Math.random() < sparkleSpawnChance) {
+                        bubble.sparkles.push({
+                            angle: Math.random() * Math.PI * 2,
+                            distance: 20 + Math.random() * 15,
+                            life: 500 + Math.random() * 300, // milliseconds
+                            speed: 0.3 + Math.random() * 0.4
+                        });
+                    }
+                    
+                    // Warning effect when bubble is about to expire
+                    if (bubble.life < 1000) { // Last 1 second
+                        const particleSpawnChance = 0.5 * (this.deltaTime / 16.67);
+                        if (Math.random() < particleSpawnChance) {
+                            this.createParticles(bubble.x, bubble.y, '#ff4400', 2);
+                        }
+                        // Play warning sound occasionally
+                        if (bubble.life <= 500 && bubble.life > 500 - this.deltaTime) {
+                            this.playSound('warning');
+                        }
+                    }
+                    
+                    return bubble.life > 0;
+                });
+                
+                // Update solar rays
+                this.gameState.solarRays = this.gameState.solarRays.filter(ray => {
+                    ray.x -= ray.speed * (this.deltaTime / 1000); // Convert speed from per-second to per-frame
+                    
+                    // Check collision with bubbles
+                    this.gameState.bubbles.forEach((bubble, bubbleIndex) => {
+                        if (this.checkCollision(ray, bubble)) {
+                            this.destroySolarRay(ray);
+                            this.gameState.score += 100;
+                            this.gameState.combo++;
+                            this.gameState.comboTimer = 1000; // 1 second
+                            this.showScorePopup(ray.x, ray.y, '+100');
+                            this.createEnhancedExplosion(ray.x, ray.y, '#ffff00');
+                            this.playSound('explosion');
+                            
+                            // Remove the bubble that blocked the ray
+                            this.gameState.bubbles.splice(bubbleIndex, 1);
+                        }
+                    });
+                    
+                    // Check if ray hits Earth (left side of screen)
+                    if (ray.x < 0) {
+                        this.gameState.temperature += ray.damage;
+                        this.createEnhancedExplosion(0, ray.y, '#ff0000');
+                        this.playSound('explosion');
+                        return false;
+                    }
+                    
+                    return ray.x > -ray.width;
+                });
+                
+                // Update solar flares
+                this.gameState.solarFlares = this.gameState.solarFlares.filter(flare => {
+                    flare.x -= flare.speed * (this.deltaTime / 1000); // Convert speed from per-second to per-frame
+                    flare.y += Math.sin(flare.x * 0.01) * flare.angle * (this.deltaTime / 16.67);
+                    
+                    // Add trail particles
+                    const trailSpawnChance = 0.7 * (this.deltaTime / 16.67);
+                    if (Math.random() < trailSpawnChance) {
+                        this.createParticles(flare.x + flare.size/2, flare.y, '#ff4400', 1);
+                    }
+                    
+                    // Check collision with ship
+                    if (this.gameState.powerupEffects.shield === 0 && 
+                        this.checkCollisionCircle(flare, this.gameState.ship)) {
+                        this.gameState.lives--;
+                        this.gameState.temperature += 0.2;
+                        this.createEnhancedExplosion(this.gameState.ship.x, this.gameState.ship.y, '#ffffff');
+                        this.playSound('explosion');
+                        this.gameState.powerupEffects.shield = 2000; // 2 seconds of invincibility
+                        return false;
+                    }
+                    
+                    // Check collision with bubbles
+                    this.gameState.bubbles.forEach((bubble, bubbleIndex) => {
+                        if (this.checkCollisionCircle(flare, bubble)) {
+                            this.gameState.score += 200;
+                            this.gameState.combo++;
+                            this.gameState.comboTimer = 1000; // 1 second
+                            this.showScorePopup(flare.x, flare.y, '+200');
+                            this.createEnhancedExplosion(flare.x, flare.y, '#00ffff');
+                            this.playSound('explosion');
+                            
+                            // Remove the bubble
+                            this.gameState.bubbles.splice(bubbleIndex, 1);
+                            return false;
+                        }
+                    });
+                    
+                    if (flare.x < 0) {
+                        this.gameState.temperature += flare.damage;
+                        this.createEnhancedExplosion(0, flare.y, '#ff0000');
+                        this.playSound('explosion');
+                        return false;
+                    }
+                    
+                    return flare.x > -flare.size;
+                });
+                
+                // Update powerups
+                this.gameState.powerups = this.gameState.powerups.filter(powerup => {
+                    powerup.x -= powerup.speed * (this.deltaTime / 1000); // Convert speed from per-second to per-frame
+                    
+                    // Add glitter trail
+                    const glitterSpawnChance = 0.4 * (this.deltaTime / 16.67);
+                    if (Math.random() < glitterSpawnChance) {
+                        const colors = { speed: '#00ff00', shield: '#0088ff', multi: '#ff00ff' };
+                        this.createParticles(powerup.x, powerup.y, colors[powerup.type], 1);
+                    }
+                    
+                    // Check collision with ship
+                    if (this.checkCollisionCircle(powerup, this.gameState.ship)) {
+                        this.activatePowerup(powerup.type);
+                        this.gameState.score += 50;
+                        this.showScorePopup(powerup.x, powerup.y, 'POWER UP!');
+                        this.createParticles(powerup.x, powerup.y, '#ffff00', 15);
+                        this.playSound('powerup');
+                        return false;
+                    }
+                    
+                    return powerup.x > -powerup.size;
+                });
+                
+                // Update particles
+                this.gameState.particles = this.gameState.particles.filter(particle => {
+                    particle.life -= this.deltaTime;
+                    particle.y -= particle.vy * (this.deltaTime / 16.67);
+                    particle.x += particle.vx * (this.deltaTime / 16.67);
+                    particle.vy *= Math.pow(0.98, this.deltaTime / 16.67); // Slight gravity/friction
+                    particle.vx *= Math.pow(0.99, this.deltaTime / 16.67);
+                    return particle.life > 0;
+                });
+                
+                // Cool planet with bubbles
+                const cooling = this.gameState.bubbles.length * 0.0008 * (this.deltaTime / 16.67);
+                this.gameState.temperature = Math.max(0.5, this.gameState.temperature - cooling);
+                
+                // Update powerup timers
+                Object.keys(this.gameState.powerupEffects).forEach(key => {
+                    if (this.gameState.powerupEffects[key] > 0) {
+                        this.gameState.powerupEffects[key] -= this.deltaTime;
+                        if (this.gameState.powerupEffects[key] < 0) {
+                            this.gameState.powerupEffects[key] = 0;
+                        }
+                    }
+                });
+                
+                // Update combo
+                if (this.gameState.comboTimer > 0) {
+                    this.gameState.comboTimer -= this.deltaTime;
+                    if (this.gameState.comboTimer <= 0) {
+                        this.gameState.combo = 0;
+                    }
+                }
+            }
+            
+            checkCollision(ray, bubble) {
+                return ray.x < bubble.x + bubble.size &&
+                       ray.x + ray.width > bubble.x - bubble.size &&
+                       ray.y < bubble.y + bubble.size &&
+                       ray.y + 4 > bubble.y - bubble.size;
+            }
+            
+            checkCollisionCircle(obj1, obj2) {
+                const dx = obj1.x - obj2.x;
+                const dy = obj1.y - obj2.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                return distance < (obj1.size || 20) + (obj2.size || 20);
+            }
+            
+            activatePowerup(type) {
+                switch(type) {
+                    case 'speed':
+                        this.gameState.powerupEffects.speed = 5000; // 5 seconds
+                        break;
+                    case 'shield':
+                        this.gameState.powerupEffects.shield = 5000; // 5 seconds
+                        break;
+                    case 'multi':
+                        this.gameState.powerupEffects.multiShot = 5000; // 5 seconds
+                        break;
+                }
+            }
+            
+            destroySolarRay(ray) {
+                const index = this.gameState.solarRays.indexOf(ray);
+                if (index > -1) {
+                    this.gameState.solarRays.splice(index, 1);
+                }
+            }
+            
+            createExplosion(x, y) {
+                this.gameState.explosions.push({ x, y, life: 500 }); // 0.5 seconds
+                this.createParticles(x, y, '#ff8800', 8);
+            }
+            
+            createEnhancedExplosion(x, y, color) {
+                // Main explosion
+                this.gameState.explosions.push({ 
+                    x, y, 
+                    life: 667, // ~0.67 seconds
+                    maxLife: 667,
+                    color: color,
+                    size: 50 + Math.random() * 30
+                });
+                
+                // Multiple particle bursts
+                this.createParticles(x, y, color, 15);
+                this.createParticles(x, y, '#ffffff', 8);
+                this.createParticles(x, y, '#ffff00', 6);
+                
+                // Shockwave particles
+                for (let i = 0; i < 12; i++) {
+                    const angle = (i / 12) * Math.PI * 2;
+                    const speed = 3 + Math.random() * 2;
+                    this.gameState.particles.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        color: color,
+                        life: 667 + Math.random() * 333, // 0.67-1 seconds
+                        size: 2 + Math.random() * 2
+                    });
+                }
+            }
+            
+            createParticles(x, y, color, count) {
+                for (let i = 0; i < count; i++) {
+                    this.gameState.particles.push({
+                        x: x + (Math.random() - 0.5) * 20,
+                        y: y + (Math.random() - 0.5) * 20,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: Math.random() * 4 + 1,
+                        color: color,
+                        life: 500 + Math.random() * 500, // 0.5-1 second
+                        maxLife: 500 + Math.random() * 500,
+                        size: 1 + Math.random() * 3,
+                        alpha: 1
+                    });
+                }
+            }
+            
+            showScorePopup(x, y, text) {
+                const popup = document.createElement('div');
+                popup.className = 'score-popup';
+                popup.textContent = text;
+                popup.style.left = x + 'px';
+                popup.style.top = y + 'px';
+                document.body.appendChild(popup);
+                
+                setTimeout(() => popup.remove(), 1000);
+            }
+            
+            showWaveIndicator() {
+                const indicator = document.createElement('div');
+                indicator.className = 'wave-indicator';
+                indicator.textContent = `WAVE ${this.gameState.wave}`;
+                document.body.appendChild(indicator);
+                
+                setTimeout(() => indicator.remove(), 2000);
+            }
+            
+            checkWaveProgression() {
+                this.gameState.waveTimer += this.deltaTime;
+                
+                if (this.gameState.waveTimer > 30000) { // 30 seconds per wave
+                    this.gameState.wave++;
+                    this.gameState.difficulty += 0.5;
+                    this.gameState.waveTimer = 0;
+                    this.gameState.score += 500;
+                    this.showWaveIndicator();
+                    this.showScorePopup(this.canvas.width / 2, this.canvas.height / 2, '+500 WAVE BONUS');
+                    this.playSound('success');
+                }
+            }
+            
+            checkGameOver() {
+                if (this.gameState.temperature >= 3.0 || this.gameState.lives <= 0) {
+                    this.endGame();
+                }
+            }
+            
+            endGame() {
+                this.gameState.playing = false;
+                this.stopAmbientSpace();
+                
+                const message = this.gameState.temperature < 1.5 ? 'PLANET SAVED!' : 
+                               this.gameState.temperature < 2.5 ? 'PARTIAL SUCCESS' : 'EARTH OVERHEATED';
+                
+                // Play appropriate end sound
+                if (this.gameState.temperature < 1.5) {
+                    this.playSound('success');
+                } else {
+                    this.playSound('gameOver');
+                }
+                
+                document.getElementById('finalMessage').textContent = message;
+                document.getElementById('finalStats').innerHTML = `
+                    <p>Final Score: ${this.gameState.score}</p>
+                    <p>Waves Survived: ${this.gameState.wave}</p>
+                    <p>Final Temperature: +${this.gameState.temperature.toFixed(1)}°C</p>
+                    <p>Bubbles Deployed: ${this.gameState.bubbles.length}</p>
+                `;
+                
+                document.getElementById('gameOverScreen').style.display = 'flex';
+                
+                // Educational popup is now triggered manually via "Learn More" button
+            }
+            
+            render() {
+                // Clear canvas
+                this.ctx.fillStyle = '#000011';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw animated stars
+                for (let i = 0; i < 50; i++) {
+                    const x = (i * 137.5 + this.gameState.gameTime * 0.0001) % this.canvas.width;
+                    const y = (i * 73.2) % this.canvas.height;
+                    const twinkle = Math.sin(this.gameState.gameTime * 0.00005 + i) * 0.5 + 0.5;
+                    this.ctx.fillStyle = `rgba(255, 255, 255, ${0.3 + twinkle * 0.7})`;
+                    this.ctx.fillRect(x, y, 1, 1);
+                }
+                
+                // Draw ship with enhanced effects
+                if (this.gameState.playing) {
+                    const ship = this.gameState.ship;
+                    
+                    // Ship thrust particles
+                    if (Math.random() < 0.6) {
+                        this.createParticles(ship.x - 5, ship.y, '#00aaff', 1);
+                    }
+                    
+                    // Ship glow
+                    if (this.gameState.powerupEffects.shield > 0) {
+                        this.ctx.shadowBlur = 30;
+                        this.ctx.shadowColor = '#ffff00';
+                    } else {
+                        this.ctx.shadowBlur = 15;
+                        this.ctx.shadowColor = '#00ffff';
+                    }
+                    
+                    this.ctx.fillStyle = this.gameState.powerupEffects.shield > 0 ? '#ffff00' : '#00ffff';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(ship.x + 30, ship.y);
+                    this.ctx.lineTo(ship.x, ship.y + 15);
+                    this.ctx.lineTo(ship.x + 10, ship.y);
+                    this.ctx.lineTo(ship.x, ship.y - 15);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                    
+                    this.ctx.shadowBlur = 0;
+                }
+                
+                // Draw bubbles with fancy effects
+                this.gameState.bubbles.forEach(bubble => {
+                    const alpha = bubble.life / bubble.maxLife;
+                    
+                    // Main bubble
+                    this.ctx.strokeStyle = `rgba(0, 255, 255, ${alpha})`;
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+                    this.ctx.arc(bubble.x, bubble.y, bubble.size / 2, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                    
+                    this.ctx.fillStyle = `rgba(0, 255, 255, ${alpha * 0.1})`;
+                    this.ctx.fill();
+                    
+                    // Inner glow
+                    this.ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.6})`;
+                    this.ctx.lineWidth = 1;
+                    this.ctx.beginPath();
+                    this.ctx.arc(bubble.x, bubble.y, (bubble.size / 2) - 5, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                    
+                    // Warning pulse when about to expire
+                    if (bubble.life < 60) {
+                        const pulse = Math.sin(bubble.life * 0.3) * 0.5 + 0.5;
+                        this.ctx.strokeStyle = `rgba(255, 68, 0, ${pulse})`;
+                        this.ctx.lineWidth = 2;
+                        this.ctx.beginPath();
+                        this.ctx.arc(bubble.x, bubble.y, bubble.size / 2 + 5, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    }
+                    
+                    // Draw sparkles around bubble
+                    bubble.sparkles.forEach(sparkle => {
+                        const sparkleX = bubble.x + Math.cos(sparkle.angle) * sparkle.distance;
+                        const sparkleY = bubble.y + Math.sin(sparkle.angle) * sparkle.distance;
+                        const sparkleAlpha = sparkle.life / 60;
+                        
+                        this.ctx.fillStyle = `rgba(0, 255, 255, ${sparkleAlpha})`;
+                        this.ctx.fillRect(sparkleX - 1, sparkleY - 1, 2, 2);
+                        
+                        // Sparkle glow
+                        this.ctx.shadowBlur = 5;
+                        this.ctx.shadowColor = '#00ffff';
+                        this.ctx.fillRect(sparkleX, sparkleY, 1, 1);
+                        this.ctx.shadowBlur = 0;
+                    });
+                });
+                
+                // Draw solar rays with heat distortion
+                this.gameState.solarRays.forEach(ray => {
+                    const gradient = this.ctx.createLinearGradient(ray.x, ray.y, ray.x + ray.width, ray.y);
+                    gradient.addColorStop(0, '#ffff00');
+                    gradient.addColorStop(0.5, '#ff8800');
+                    gradient.addColorStop(1, '#ff4400');
+                    
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.fillRect(ray.x, ray.y, ray.width, 4);
+                    
+                    // Heat glow
+                    this.ctx.shadowBlur = 10;
+                    this.ctx.shadowColor = '#ffff00';
+                    this.ctx.fillRect(ray.x, ray.y, ray.width, 4);
+                    this.ctx.shadowBlur = 0;
+                });
+                
+                // Draw solar flares with enhanced effects
+                this.gameState.solarFlares.forEach(flare => {
+                    // Main flare
+                    const gradient = this.ctx.createRadialGradient(flare.x, flare.y, 0, flare.x, flare.y, flare.size / 2);
+                    gradient.addColorStop(0, '#ff6600');
+                    gradient.addColorStop(0.5, '#ff4400');
+                    gradient.addColorStop(1, '#aa2200');
+                    
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(flare.x, flare.y, flare.size / 2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // Outer glow
+                    this.ctx.shadowBlur = 20;
+                    this.ctx.shadowColor = '#ff4400';
+                    this.ctx.fill();
+                    this.ctx.shadowBlur = 0;
+                });
+                
+                // Draw powerups with enhanced glow
+                this.gameState.powerups.forEach(powerup => {
+                    const colors = { speed: '#00ff00', shield: '#0088ff', multi: '#ff00ff' };
+                    const color = colors[powerup.type];
+                    
+                    this.ctx.fillStyle = color;
+                    this.ctx.shadowBlur = 15;
+                    this.ctx.shadowColor = color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(powerup.x, powerup.y, powerup.size / 2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.shadowBlur = 0;
+                    
+                    // Pulsing ring
+                    const pulse = Math.sin(Date.now() * 0.01) * 0.3 + 0.7;
+                    this.ctx.strokeStyle = `rgba(${color.slice(1, 3)}, ${color.slice(3, 5)}, ${color.slice(5, 7)}, ${pulse})`;
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(powerup.x, powerup.y, powerup.size / 2 + 5, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                });
+                
+                // Draw enhanced particles
+                this.gameState.particles.forEach(particle => {
+                    particle.alpha = particle.life / particle.maxLife;
+                    const size = particle.size * particle.alpha;
+                    
+                    // Convert hex color to rgb for alpha
+                    let r, g, b;
+                    if (particle.color === '#00ffff') { r = 0; g = 255; b = 255; }
+                    else if (particle.color === '#ffff00') { r = 255; g = 255; b = 0; }
+                    else if (particle.color === '#ff8800') { r = 255; g = 136; b = 0; }
+                    else if (particle.color === '#ff4400') { r = 255; g = 68; b = 0; }
+                    else if (particle.color === '#ffffff') { r = 255; g = 255; b = 255; }
+                    else if (particle.color === '#00ff00') { r = 0; g = 255; b = 0; }
+                    else if (particle.color === '#0088ff') { r = 0; g = 136; b = 255; }
+                    else if (particle.color === '#ff00ff') { r = 255; g = 0; b = 255; }
+                    else { r = 255; g = 255; b = 255; }
+                    
+                    this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${particle.alpha})`;
+                    this.ctx.fillRect(particle.x - size/2, particle.y - size/2, size, size);
+                    
+                    // Particle glow
+                    if (size > 1) {
+                        this.ctx.shadowBlur = 3;
+                        this.ctx.shadowColor = particle.color;
+                        this.ctx.fillRect(particle.x, particle.y, 1, 1);
+                        this.ctx.shadowBlur = 0;
+                    }
+                });
+                
+                // Draw enhanced explosions
+                this.gameState.explosions = this.gameState.explosions.filter(explosion => {
+                    const alpha = explosion.life / explosion.maxLife;
+                    const size = (explosion.size || 30) * (1 - alpha) + 10;
+                    
+                    // Multiple explosion rings
+                    const rings = 3;
+                    for (let i = 0; i < rings; i++) {
+                        const ringSize = size * (1 + i * 0.3);
+                        const ringAlpha = alpha / (i + 1);
+                        
+                        let r, g, b;
+                        if (explosion.color === '#ffff00') { r = 255; g = 255; b = 0; }
+                        else if (explosion.color === '#ff0000') { r = 255; g = 0; b = 0; }
+                        else if (explosion.color === '#00ffff') { r = 0; g = 255; b = 255; }
+                        else if (explosion.color === '#ffffff') { r = 255; g = 255; b = 255; }
+                        else { r = 255; g = 136; b = 0; }
+                        
+                        this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${ringAlpha})`;
+                        this.ctx.beginPath();
+                        this.ctx.arc(explosion.x, explosion.y, ringSize, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                    
+                    explosion.life -= this.deltaTime;
+                    return explosion.life > 0;
+                });
+            }
+            
+            updateHUD() {
+                const tempHud = document.getElementById('tempHud');
+                const temp = this.gameState.temperature.toFixed(1);
+                tempHud.textContent = `TEMP: +${temp}°C`;
+                
+                if (this.gameState.temperature < 1.5) {
+                    tempHud.className = 'hud-item temp-good';
+                } else if (this.gameState.temperature < 2.5) {
+                    tempHud.className = 'hud-item temp-warning';
+                } else {
+                    tempHud.className = 'hud-item temp-critical';
+                }
+                
+                document.getElementById('score').textContent = this.gameState.score;
+                document.getElementById('wave').textContent = this.gameState.wave;
+                
+                // Combo indicator
+                const comboEl = document.getElementById('comboIndicator');
+                if (this.gameState.combo > 1) {
+                    comboEl.style.display = 'block';
+                    comboEl.textContent = `COMBO x${this.gameState.combo}`;
+                } else {
+                    comboEl.style.display = 'none';
+                }
+            }
+            
+            gameLoop() {
+                const currentTime = Date.now();
+                if (this.lastTime === 0) this.lastTime = currentTime; // Initialize on first frame
+                this.deltaTime = currentTime - this.lastTime;
+                this.lastTime = currentTime;
+                
+                // Cap delta time to prevent large jumps (e.g., when tab becomes inactive)
+                this.deltaTime = Math.min(this.deltaTime, 50); // Max 50ms delta
+                
+                if (this.gameState.playing) {
+                    this.gameState.gameTime += this.deltaTime;
+                    this.updateShip();
+                    this.spawnSolarRays();
+                    this.spawnPowerups();
+                    this.updateGameObjects();
+                    this.checkWaveProgression();
+                    this.checkGameOver();
+                }
+                
+                this.render();
+                this.updateHUD();
+                
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // Global functions
+        function startGame() {
+            if (window.game) {
+                // Initialize audio on first user interaction
+                if (window.game.audioContext && window.game.audioContext.state === 'suspended') {
+                    window.game.audioContext.resume();
+                }
+                window.game.startGame();
+            }
+        }
+        
+        function showEducationalPopup() {
+            const popup = document.getElementById('educationalPopup');
+            popup.style.display = 'flex';
+            // Trigger reflow to ensure display change is applied before adding show class
+            popup.offsetHeight;
+            setTimeout(() => {
+                popup.classList.add('show');
+            }, 10);
+        }
+        
+        function closeEducationalPopup() {
+            const popup = document.getElementById('educationalPopup');
+            popup.classList.remove('show');
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 500); // Match the CSS transition duration
+        }
+        
+        // Keyboard support for closing popup
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const popup = document.getElementById('educationalPopup');
+                if (popup.classList.contains('show')) {
+                    closeEducationalPopup();
+                }
+            }
+        });
+        
+        // Initialize game
+        window.addEventListener('load', () => {
+            window.game = new SpaceBubblesArcade();
+        });
+    </script>
+</body>
+</html>
