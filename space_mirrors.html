@@ -201,12 +201,12 @@
         .powerup-multi { background: #ff00ff; }
 
         @keyframes powerupFloat {
-            0%, 100% { transform: translateY(0px) scale(1); }
-            50% { transform: translateY(-10px) scale(1.2); }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         @keyframes powerupMove {
-            from { left: 100vw; }
+            from { left: 100%; }
             to { left: -50px; }
         }
 
@@ -346,16 +346,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 3rem;
-            font-weight: bold;
+            font-size: 4rem;
+            font-weight: 900;
             color: #ffff00;
-            text-shadow: 0 0 20px #ffff00;
-            animation: waveAnnounce 2s ease-out forwards;
+            text-shadow: 0 0 30px #ffff00;
             z-index: 150;
+            animation: waveGlow 2s ease-in-out;
         }
 
-        @keyframes waveAnnounce {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+        @keyframes waveGlow {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
             50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
             100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
         }
@@ -376,18 +376,241 @@
         }
 
         @media (max-width: 768px) {
-            .title { font-size: 2.5rem; }
-            .hud { font-size: 14px; gap: 10px; }
-            .ship { width: 30px; height: 30px; }
-            
-            .earth {
-                width: 25vw; /* Slightly wider on mobile for better visibility */
+            body {
+                overflow: auto;
+            }
+
+            .game-container {
+                width: 100vw;
+                height: 100vh;
+                position: fixed;
+                top: 0;
+                left: 0;
+            }
+
+            .hud {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                font-size: clamp(10px, 3vw, 16px);
+                gap: 10px;
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+
+            .hud-item {
+                padding: 5px;
+                font-size: clamp(9px, 2.5vw, 14px);
+            }
+
+            .title {
+                font-size: clamp(2rem, 8vw, 3.5rem);
+                margin-bottom: 15px;
+            }
+
+            .subtitle {
+                font-size: clamp(1rem, 4vw, 1.3rem);
+                margin-bottom: 25px;
+            }
+
+            .instructions {
+                max-width: 90%;
+                font-size: clamp(0.8rem, 2.5vw, 1rem);
+                margin-bottom: 25px;
+                padding: 0 20px;
+            }
+
+            .controls {
+                padding: 15px;
+                margin-bottom: 20px;
+                font-size: clamp(0.7rem, 2vw, 0.9rem);
+            }
+
+            .btn {
+                padding: 12px 24px;
+                font-size: clamp(0.9rem, 3vw, 1.1rem);
+                min-height: 44px; /* iOS minimum touch target */
+                touch-action: manipulation;
+            }
+
+            .ship {
+                width: 30px;
+                height: 30px;
+            }
+
+            .bubble {
+                border-width: 2px;
+            }
+
+            .solar-ray {
+                height: 3px;
+            }
+
+            .powerup {
+                width: 20px;
+                height: 20px;
+            }
+
+            /* Prevent zoom on double tap */
+            .game-canvas {
+                touch-action: manipulation;
+                user-select: none;
+                -webkit-user-select: none;
+                -webkit-touch-callout: none;
+                cursor: none;
             }
         }
 
-        @media (max-width: 480px) {
-            .earth {
-                width: 30vw; /* Even wider on small phones */
+        /* Portrait orientation on mobile */
+        @media (max-width: 768px) and (orientation: portrait) {
+            .hud {
+                top: 5px;
+                left: 5px;
+                right: 5px;
+                font-size: clamp(8px, 2.5vw, 14px);
+                gap: 5px;
+            }
+
+            .hud-item {
+                padding: 4px;
+                font-size: clamp(7px, 2vw, 12px);
+            }
+
+            .title {
+                font-size: clamp(1.8rem, 7vw, 3rem);
+                margin-bottom: 10px;
+            }
+
+            .subtitle {
+                font-size: clamp(0.9rem, 3.5vw, 1.2rem);
+                margin-bottom: 20px;
+            }
+
+            .instructions {
+                font-size: clamp(0.7rem, 2.2vw, 0.9rem);
+                margin-bottom: 20px;
+                line-height: 1.4;
+            }
+
+            .controls {
+                padding: 12px;
+                margin-bottom: 15px;
+                font-size: clamp(0.6rem, 1.8vw, 0.8rem);
+                line-height: 1.3;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: clamp(0.8rem, 2.8vw, 1rem);
+                min-height: 40px;
+            }
+
+            .ship {
+                width: 25px;
+                height: 25px;
+            }
+
+            .wave-indicator {
+                font-size: clamp(2.5rem, 8vw, 3.5rem);
+            }
+        }
+
+        /* Extra small portrait phones */
+        @media (max-width: 400px) and (orientation: portrait) {
+            .hud {
+                top: 3px;
+                left: 3px;
+                right: 3px;
+                gap: 3px;
+            }
+
+            .hud-item {
+                padding: 3px;
+                font-size: clamp(6px, 1.8vw, 10px);
+            }
+
+            .title {
+                font-size: clamp(1.5rem, 6vw, 2.5rem);
+                margin-bottom: 8px;
+            }
+
+            .subtitle {
+                font-size: clamp(0.8rem, 3vw, 1rem);
+                margin-bottom: 15px;
+            }
+
+            .instructions {
+                font-size: clamp(0.6rem, 2vw, 0.8rem);
+                margin-bottom: 15px;
+            }
+
+            .controls {
+                padding: 10px;
+                margin-bottom: 12px;
+                font-size: clamp(0.5rem, 1.6vw, 0.7rem);
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+                min-height: 36px;
+                margin: 5px;
+            }
+
+            .ship {
+                width: 22px;
+                height: 22px;
+            }
+
+            .wave-indicator {
+                font-size: clamp(2rem, 7vw, 3rem);
+            }
+        }
+
+        /* Landscape orientation on mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .hud {
+                top: 5px;
+                left: 5px;
+                right: 5px;
+                font-size: clamp(10px, 2vw, 14px);
+                gap: 8px;
+            }
+
+            .hud-item {
+                padding: 3px;
+                font-size: clamp(8px, 1.8vw, 12px);
+            }
+
+            .title {
+                font-size: clamp(1.8rem, 5vw, 2.8rem);
+                margin-bottom: 8px;
+            }
+
+            .subtitle {
+                font-size: clamp(0.8rem, 2.5vw, 1.1rem);
+                margin-bottom: 15px;
+            }
+
+            .instructions {
+                font-size: clamp(0.6rem, 1.8vw, 0.8rem);
+                margin-bottom: 15px;
+                max-width: 95%;
+            }
+
+            .controls {
+                padding: 8px;
+                margin-bottom: 10px;
+                font-size: clamp(0.5rem, 1.5vw, 0.7rem);
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: clamp(0.7rem, 2vw, 0.9rem);
+                min-height: 32px;
+            }
+
+            .wave-indicator {
+                font-size: clamp(2rem, 6vw, 3rem);
             }
         }
 
@@ -606,8 +829,8 @@
                 <br>
                 <div class="controls">
                     <p><strong>CONTROLS:</strong></p>
-                    <p>🚀 MOUSE/WASD - Move Ship</p>
-                    <p>🔴 CLICK/SPACE - Deploy Bubble Satellite</p>
+                    <p>🚀 MOUSE/WASD/TOUCH - Move Ship</p>
+                    <p>🔴 CLICK/SPACE/TAP - Deploy Bubble Satellite</p>
                     <p>⚡ Collect Power-ups for special abilities!</p>
                     <p>🔊 Enable sound for the full experience!</p>
                 </div>
@@ -946,6 +1169,53 @@
                 
                 this.canvas.addEventListener('mouseup', () => {
                     this.gameState.mouse.down = false;
+                });
+                
+                // Touch controls for mobile
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    if (touch) {
+                        const rect = this.canvas.getBoundingClientRect();
+                        this.gameState.mouse.x = touch.clientX - rect.left;
+                        this.gameState.mouse.y = touch.clientY - rect.top;
+                        this.gameState.mouse.down = true;
+                        
+                        if (this.gameState.playing) {
+                            this.shootBubble();
+                        }
+                    }
+                }, { passive: false });
+                
+                this.canvas.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    if (touch) {
+                        const rect = this.canvas.getBoundingClientRect();
+                        this.gameState.mouse.x = touch.clientX - rect.left;
+                        this.gameState.mouse.y = touch.clientY - rect.top;
+                    }
+                }, { passive: false });
+                
+                this.canvas.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.gameState.mouse.down = false;
+                }, { passive: false });
+                
+                // Prevent context menu on long press
+                this.canvas.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                });
+                
+                // Touch events for starting the game
+                document.addEventListener('touchstart', (e) => {
+                    if (!this.gameState.playing && (document.getElementById('startScreen').style.display !== 'none' || document.getElementById('gameOverScreen').style.display !== 'none')) {
+                        // Start game on touch when on start/game over screen
+                        const startBtn = document.querySelector('.btn');
+                        if (startBtn) {
+                            startBtn.click();
+                        }
+                    }
                 });
                 
                 // Resize handler

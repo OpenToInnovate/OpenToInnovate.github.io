@@ -137,6 +137,282 @@
             background: #00cccc;
             box-shadow: 0 0 10px #00cccc;
         }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                overflow: auto;
+            }
+
+            .game-container {
+                width: 95vw;
+                height: 70vh;
+                max-width: 600px;
+                max-height: 450px;
+                min-width: 320px;
+                min-height: 240px;
+            }
+
+            .title {
+                font-size: clamp(20px, 6vw, 36px);
+                top: 30%;
+            }
+
+            .subtitle {
+                font-size: clamp(12px, 3vw, 16px);
+                top: 45%;
+            }
+
+            .controls {
+                font-size: clamp(10px, 2.5vw, 12px);
+                top: 60%;
+                padding: 0 15px;
+                max-width: 90%;
+            }
+
+            .hud {
+                font-size: clamp(10px, 2.5vw, 14px);
+                top: 5px;
+                left: 5px;
+                right: 5px;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .hud > div {
+                flex: 1;
+                min-width: 80px;
+                text-align: center;
+            }
+
+            .game-over, .victory {
+                padding: 20px;
+                max-width: 90%;
+                max-height: 80%;
+                overflow-y: auto;
+                font-size: clamp(12px, 3vw, 14px);
+            }
+
+            .game-over h2, .victory h2 {
+                font-size: clamp(16px, 4vw, 20px);
+                margin-bottom: 15px;
+            }
+
+            button {
+                padding: 12px 24px;
+                font-size: clamp(12px, 3vw, 16px);
+                min-height: 44px; /* iOS minimum touch target */
+                touch-action: manipulation;
+            }
+
+            /* Prevent zoom on double tap */
+            canvas {
+                touch-action: manipulation;
+                user-select: none;
+                -webkit-user-select: none;
+                -webkit-touch-callout: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                width: 98vw;
+                height: 65vh;
+            }
+
+            .hud {
+                flex-direction: column;
+                align-items: center;
+                gap: 2px;
+            }
+
+            .hud > div {
+                min-width: auto;
+            }
+
+            .controls {
+                top: 65%;
+                line-height: 1.4;
+            }
+        }
+
+        /* Landscape orientation on mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .game-container {
+                width: 90vw;
+                height: 85vh;
+            }
+
+            .title {
+                top: 25%;
+                font-size: clamp(18px, 5vw, 28px);
+            }
+
+            .subtitle {
+                top: 40%;
+                font-size: clamp(10px, 2.5vw, 14px);
+            }
+
+            .controls {
+                top: 55%;
+                font-size: clamp(9px, 2vw, 11px);
+            }
+        }
+
+        /* Portrait orientation on mobile */
+        @media (max-width: 768px) and (orientation: portrait) {
+            body {
+                padding: 5px;
+                overflow: auto;
+            }
+
+            .game-container {
+                width: 98vw;
+                height: 60vh;
+                max-width: 500px;
+                max-height: 400px;
+                min-width: 300px;
+                min-height: 225px;
+            }
+
+            .title {
+                font-size: clamp(16px, 5vw, 24px);
+                top: 25%;
+            }
+
+            .subtitle {
+                font-size: clamp(10px, 2.5vw, 14px);
+                top: 40%;
+            }
+
+            .controls {
+                font-size: clamp(8px, 2vw, 11px);
+                top: 55%;
+                padding: 0 10px;
+                max-width: 95%;
+                line-height: 1.3;
+            }
+
+            .hud {
+                font-size: clamp(8px, 2vw, 12px);
+                top: 3px;
+                left: 3px;
+                right: 3px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 3px;
+                justify-content: space-around;
+            }
+
+            .hud > div {
+                flex: 1;
+                min-width: 70px;
+                text-align: center;
+                font-size: clamp(8px, 2vw, 11px);
+            }
+
+            .game-over, .victory {
+                padding: 15px;
+                max-width: 95%;
+                max-height: 85%;
+                overflow-y: auto;
+                font-size: clamp(10px, 2.5vw, 12px);
+                margin: 10px;
+            }
+
+            .game-over h2, .victory h2 {
+                font-size: clamp(14px, 3.5vw, 18px);
+                margin-bottom: 10px;
+            }
+
+            .game-over div, .victory div {
+                font-size: clamp(9px, 2vw, 11px);
+                padding: 10px;
+                margin: 10px 0;
+                line-height: 1.3;
+            }
+
+            button {
+                padding: 10px 20px;
+                font-size: clamp(11px, 3vw, 14px);
+                min-height: 40px;
+                margin: 8px;
+                border-radius: 8px;
+            }
+        }
+
+        /* Extra small portrait phones */
+        @media (max-width: 400px) and (orientation: portrait) {
+            .game-container {
+                width: 99vw;
+                height: 55vh;
+                max-height: 350px;
+                min-height: 200px;
+            }
+
+            .title {
+                font-size: clamp(14px, 4vw, 20px);
+                top: 22%;
+            }
+
+            .subtitle {
+                font-size: clamp(9px, 2vw, 12px);
+                top: 38%;
+            }
+
+            .controls {
+                font-size: clamp(7px, 1.8vw, 10px);
+                top: 52%;
+                line-height: 1.2;
+            }
+
+            .hud {
+                font-size: clamp(7px, 1.8vw, 10px);
+                gap: 2px;
+            }
+
+            .hud > div {
+                min-width: 60px;
+                font-size: clamp(7px, 1.8vw, 10px);
+            }
+
+            .game-over, .victory {
+                padding: 12px;
+                font-size: clamp(9px, 2vw, 11px);
+            }
+
+            .game-over h2, .victory h2 {
+                font-size: clamp(12px, 3vw, 16px);
+            }
+
+            button {
+                padding: 8px 16px;
+                font-size: clamp(10px, 2.5vw, 13px);
+                min-height: 36px;
+                margin: 6px;
+            }
+        }
+
+        /* Very tall portrait screens (aspect ratio > 2:1) */
+        @media (max-width: 768px) and (orientation: portrait) and (min-aspect-ratio: 1/2) {
+            .game-container {
+                height: 50vh;
+                max-height: 450px;
+            }
+
+            .title {
+                top: 20%;
+            }
+
+            .subtitle {
+                top: 35%;
+            }
+
+            .controls {
+                top: 50%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -159,7 +435,7 @@
         
         <div class="controls" id="titleControls">
             Click moving canisters to deploy aerosol clouds and cool the planet!<br>
-            <strong>SPACE</strong> to start • <strong>Click</strong> canisters to deploy them<br>
+            <strong>SPACE or TAP</strong> to start • <strong>Click/Touch</strong> canisters to deploy them<br>
             <em>Survive as long as possible while keeping Earth cool!</em>
         </div>
 
@@ -400,8 +676,70 @@
             }
 
             setupEventListeners() {
+                // Mouse events for desktop
                 this.canvas.addEventListener('click', (e) => this.handleClick(e));
+                
+                // Touch events for mobile
+                this.canvas.addEventListener('touchstart', (e) => this.handleTouch(e));
+                this.canvas.addEventListener('touchend', (e) => this.handleTouch(e));
+                
+                // Prevent scrolling and zooming on touch
+                this.canvas.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                }, { passive: false });
+                
+                // Prevent context menu on long press
+                this.canvas.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                });
+                
+                // Keyboard events
                 document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+                
+                // Touch events for starting the game
+                document.addEventListener('touchstart', (e) => {
+                    if (this.gameState === 'menu') {
+                        e.preventDefault();
+                        this.startGame();
+                    }
+                });
+            }
+
+            handleTouch(e) {
+                e.preventDefault(); // Prevent default touch behavior
+                
+                if (this.gameState !== 'playing') {
+                    if (this.gameState === 'menu') {
+                        this.startGame();
+                    }
+                    return;
+                }
+
+                // Handle touch events similar to clicks
+                const touch = e.touches[0] || e.changedTouches[0];
+                if (!touch) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
+                const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
+                
+                // Check if touch hits any moving canister
+                for (let i = this.movingCanisters.length - 1; i >= 0; i--) {
+                    const canister = this.movingCanisters[i];
+                    const dist = Math.sqrt((x - canister.x) ** 2 + (y - canister.y) ** 2);
+                    
+                    // Slightly larger hit area for touch
+                    const hitRadius = canister.radius + 10;
+                    
+                    if (dist <= hitRadius) {
+                        // Deploy aerosol cloud at canister location
+                        this.deployAshCanister(canister.x, canister.y);
+                        // Remove the clicked canister
+                        this.movingCanisters.splice(i, 1);
+                        this.activeCanisters--;
+                        break;
+                    }
+                }
             }
 
             handleClick(e) {
