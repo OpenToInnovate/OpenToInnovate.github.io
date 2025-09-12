@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRISM - NHS Primary Care Intelligence System - GOV.UK</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "HelveticaNeue", "Helvetica Neue", "Arial", "Helvetica", sans-serif;
+            font-size: 19px;
+            line-height: 1.47368;
+            color: #0b0c0c;
+            background-color: #ffffff;
+        }
+
+        /* GOV.UK Header */
+        .govuk-header {
+            background-color: #0b0c0c;
+            border-bottom: 10px solid #1d70b8;
+        }
+
+        .govuk-header-container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .govuk-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .govuk-header-logo {
+            display: flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 30px;
+        }
+
+        .govuk-crown {
+            margin-right: 10px;
+            width: 36px;
+            height: 32px;
+        }
+
+        .service-name {
+            color: white;
+            font-size: 24px;
+            margin-left: 10px;
+            padding-left: 10px;
+            border-left: 1px solid #2e3133;
+        }
+
+        /* Phase Banner */
+        .govuk-phase-banner {
+            background-color: #f3f2f1;
+            border-bottom: 1px solid #b1b4b6;
+        }
+
+        .govuk-phase-banner-content {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .govuk-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: #1d70b8;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-right: 10px;
+        }
+
+        /* Navigation */
+        .govuk-nav {
+            background-color: #f3f2f1;
+            border-bottom: 1px solid #b1b4b6;
+        }
+
+        .govuk-nav-container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .govuk-nav-list {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .govuk-nav-item {
+            margin-right: 20px;
+        }
+
+        .govuk-nav-link {
+            display: block;
+            padding: 15px 0;
+            color: #1d70b8;
+            text-decoration: none;
+            font-weight: 400;
+            border-bottom: 4px solid transparent;
+        }
+
+        .govuk-nav-link:hover {
+            border-bottom-color: #1d70b8;
+        }
+
+        .govuk-nav-link.active {
+            border-bottom-color: #1d70b8;
+            color: #0b0c0c;
+            font-weight: 700;
+        }
+
+        /* Main Container */
+        .govuk-width-container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .govuk-main-wrapper {
+            padding: 40px 0;
+        }
+
+        /* NHS Panel Styling */
+        .nhs-panel {
+            background-color: #005eb8;
+            color: white;
+            padding: 24px;
+            margin-bottom: 40px;
+        }
+
+        .nhs-panel-heading {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .nhs-panel-body {
+            font-size: 24px;
+        }
+
+        /* Grid System */
+        .govuk-grid-row {
+            display: flex;
+            margin: 0 -15px;
+            flex-wrap: wrap;
+        }
+
+        .govuk-grid-column-one-half {
+            flex: 0 0 50%;
+            padding: 0 15px;
+        }
+
+        .govuk-grid-column-full {
+            flex: 0 0 100%;
+            padding: 0 15px;
+        }
+
+        .govuk-grid-column-one-third {
+            flex: 0 0 33.333%;
+            padding: 0 15px;
+        }
+
+        .govuk-grid-column-two-thirds {
+            flex: 0 0 66.666%;
+            padding: 0 15px;
+        }
+
+        /* Cards */
+        .govuk-card {
+            background-color: #f3f2f1;
+            border: 1px solid #b1b4b6;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .govuk-card-white {
+            background-color: white;
+        }
+
+        /* Headings */
+        h1, .govuk-heading-xl {
+            font-size: 48px;
+            font-weight: 700;
+            line-height: 1.0416666667;
+            margin-bottom: 30px;
+        }
+
+        h2, .govuk-heading-l {
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1.1111111111;
+            margin-bottom: 20px;
+        }
+
+        h3, .govuk-heading-m {
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1.25;
+            margin-bottom: 15px;
+        }
+
+        /* Summary List */
+        .govuk-summary-list {
+            font-size: 19px;
+            margin-bottom: 20px;
+        }
+
+        .govuk-summary-list-row {
+            border-bottom: 1px solid #b1b4b6;
+            padding: 15px 0;
+            display: flex;
+        }
+
+        .govuk-summary-list-key {
+            font-weight: 700;
+            width: 35%;
+        }
+
+        .govuk-summary-list-value {
+            width: 65%;
+        }
+
+        /* Buttons */
+        .govuk-button {
+            background-color: #00703c;
+            color: white;
+            font-size: 19px;
+            font-weight: 400;
+            padding: 8px 20px 7px;
+            border: 2px solid transparent;
+            border-radius: 0;
+            cursor: pointer;
+            display: inline-block;
+            text-decoration: none;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 0 #002d18;
+        }
+
+        .govuk-button:hover {
+            background-color: #005a30;
+        }
+
+        .govuk-button-secondary {
+            background-color: #f3f2f1;
+            color: #0b0c0c;
+            box-shadow: 0 2px 0 #929191;
+        }
+
+        .govuk-button-secondary:hover {
+            background-color: #dbdad9;
+        }
+
+        .govuk-button-warning {
+            background-color: #d4351c;
+            box-shadow: 0 2px 0 #55150b;
+        }
+
+        /* NHS Buttons */
+        .nhs-button {
+            background-color: #007f3b;
+            color: white;
+            font-size: 19px;
+            padding: 12px 20px;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            font-weight: 600;
+        }
+
+        .nhs-button-secondary {
+            background-color: #768692;
+        }
+
+        /* Forms */
+        .govuk-form-group {
+            margin-bottom: 20px;
+        }
+
+        .govuk-label {
+            display: block;
+            font-weight: 400;
+            font-size: 19px;
+            margin-bottom: 5px;
+        }
+
+        .govuk-label-l {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .govuk-input {
+            font-size: 19px;
+            width: 100%;
+            padding: 5px;
+            border: 2px solid #0b0c0c;
+        }
+
+        .govuk-textarea {
+            font-size: 19px;
+            width: 100%;
+            padding: 5px;
+            border: 2px solid #0b0c0c;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        .govuk-select {
+            font-size: 19px;
+            width: 100%;
+            padding: 5px;
+            border: 2px solid #0b0c0c;
+            background-color: white;
+        }
+
+        /* Tables */
+        .govuk-table {
+            width: 100%;
+            margin-bottom: 30px;
+            font-size: 19px;
+            border-collapse: collapse;
+        }
+
+        .govuk-table-header {
+            font-weight: 700;
+            text-align: left;
+            padding: 10px 20px 10px 0;
+            border-bottom: 1px solid #b1b4b6;
+        }
+
+        .govuk-table-cell {
+            padding: 10px 20px 10px 0;
+            border-bottom: 1px solid #b1b4b6;
+        }
+
+        /* Warning Text */
+        .govuk-warning-text {
+            position: relative;
+            padding-left: 45px;
+            margin-bottom: 20px;
+        }
+
+        .govuk-warning-text-icon {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 30px;
+        }
+
+        /* Inset Text */
+        .govuk-inset-text {
+            border-left: 10px solid #b1b4b6;
+            padding: 15px;
+            margin: 30px 0;
+        }
+
+        /* NHS Care Card */
+        .nhs-care-card {
+            border: 1px solid #005eb8;
+            margin-bottom: 30px;
+        }
+
+        .nhs-care-card-heading {
+            background-color: #005eb8;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .nhs-care-card-content {
+            padding: 20px;
+            background-color: #ffffff;
+        }
+
+        .nhs-care-card-urgent {
+            border-color: #d5281b;
+        }
+
+        .nhs-care-card-urgent .nhs-care-card-heading {
+            background-color: #d5281b;
+        }
+
+        /* Statistics */
+        .stat-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background-color: white;
+            border: 2px solid #005eb8;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            color: #005eb8;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: #425563;
+        }
+
+        .stat-change {
+            font-size: 14px;
+            color: #007f3b;
+            margin-top: 5px;
+        }
+
+        /* Tags and Badges */
+        .govuk-tag-green {
+            background-color: #00703c;
+        }
+
+        .govuk-tag-red {
+            background-color: #d4351c;
+        }
+
+        .govuk-tag-yellow {
+            background-color: #ffdd00;
+            color: #0b0c0c;
+        }
+
+        /* Back Link */
+        .govuk-back-link {
+            color: #0b0c0c;
+            font-size: 16px;
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            border-bottom: 1px solid #0b0c0c;
+        }
+
+        .govuk-back-link:before {
+            content: "← ";
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Notification Banner */
+        .govuk-notification-banner {
+            background-color: #1d70b8;
+            color: white;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .govuk-notification-banner-success {
+            background-color: #00703c;
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            border: 4px solid #f3f2f1;
+            border-top: 4px solid #005eb8;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .govuk-grid-column-one-half,
+            .govuk-grid-column-one-third,
+            .govuk-grid-column-two-thirds {
+                flex: 0 0 100%;
+            }
+            
+            .stat-container {
+                flex-direction: column;
+            }
+            
+            .govuk-nav-list {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- GOV.UK Header -->
+    <header class="govuk-header">
+        <div class="govuk-header-container">
+            <div class="govuk-header-content">
+                <div class="govuk-header-logo">
+                    <svg class="govuk-crown" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 97" height="32" width="36">
+                        <path fill="currentColor" fill-rule="evenodd" d="M25 30.2c3.5 1.5 7.7-.2 9.1-3.7 1.5-3.6-.2-7.8-3.9-9.2-3.6-1.4-7.6.3-9.1 3.9-1.4 3.5.3 7.5 3.9 9zM9 39.5c3.6 1.5 7.8-.2 9.2-3.7 1.5-3.6-.2-7.8-3.9-9.1-3.6-1.5-7.6.2-9.1 3.8-1.4 3.5.3 7.5 3.8 9zM4.4 57.2c3.5 1.5 7.7-.2 9.1-3.8 1.5-3.6-.2-7.7-3.9-9.1-3.5-1.5-7.6.3-9.1 3.8-1.4 3.5.3 7.6 3.9 9.1zm38.3-21.4c3.5 1.5 7.7-.2 9.1-3.8 1.5-3.6-.2-7.7-3.9-9.1-3.6-1.5-7.6.3-9.1 3.8-1.3 3.6.4 7.7 3.9 9.1zm64.4-5.6c-3.6 1.5-7.8-.2-9.1-3.7-1.5-3.6.2-7.8 3.8-9.2 3.6-1.4 7.7.3 9.2 3.9 1.3 3.5-.4 7.5-3.9 9zm15.9 9.3c-3.6 1.5-7.7-.2-9.1-3.7-1.5-3.6.2-7.8 3.7-9.1 3.6-1.5 7.7.2 9.2 3.8 1.5 3.5-.3 7.5-3.8 9zm4.7 17.7c-3.6 1.5-7.8-.2-9.2-3.8-1.5-3.6.2-7.7 3.9-9.1 3.6-1.5 7.7.3 9.2 3.8 1.3 3.5-.4 7.6-3.9 9.1zM89.3 35.8c-3.6 1.5-7.8-.2-9.2-3.8-1.4-3.6.2-7.7 3.9-9.1 3.6-1.5 7.7.3 9.2 3.8 1.4 3.6-.3 7.7-3.9 9.1zM69.7 17.7l8.9 4.7V9.3l-8.9 2.8c-.2-.3-.5-.6-.9-.9L72.4 0H59.6l3.5 11.2c-.3.3-.6.5-.9.9l-8.8-2.8v13.1l8.8-4.7c.3.3.6.7.9.9l-5 15.4v.1c-.2.8-.4 1.6-.4 2.4 0 4.1 3.1 7.5 7 8.1h.2c.3 0 .7.1 1 .1.4 0 .7 0 1-.1h.2c4-.6 7.1-4.1 7.1-8.1 0-.8-.1-1.7-.4-2.4V34l-5.1-15.4c.4-.2.7-.6 1-.9zM66 92.8c16.9 0 32.8 1.1 47.1 3.2 4-16.9 8.9-26.7 14-33.5l-9.6-3.4c1 4.9 1.1 7.2 0 10.2-1.5-1.4-3-4.3-4.2-8.7L108.6 76c2.8-2 5-3.2 7.5-3.3-4.4 9.4-10 11.9-13.6 11.2-4.3-.8-6.3-4.6-5.6-7.9 1-4.7 5.7-5.9 8-.5 4.3-8.7-3-11.4-7.6-8.8 7.1-7.2 7.9-13.5 2.1-21.1-8 6.1-8.1 12.3-4.5 20.8-4.7-5.4-12.1-2.5-9.5 6.2 3.4-5.2 7.9-2 7.2 3.1-.6 4.3-6.4 7.8-13.5 7.2-10.3-.9-10.9-8-11.2-13.8 2.5-.5 7.1 1.8 11 7.3L80.2 60c-4.1 4.4-8 5.3-12.3 5.4 1.4-4.4 8-11.6 8-11.6H55.5s6.4 7.2 7.9 11.6c-4.2-.1-8-1-12.3-5.4l1.4 16.4c3.9-5.5 8.5-7.7 10.9-7.3-.3 5.8-.9 12.8-11.1 13.8-7.2.6-12.9-2.9-13.5-7.2-.7-5 3.8-8.3 7.1-3.1 2.7-8.7-4.6-11.6-9.4-6.2 3.7-8.5 3.6-14.7-4.6-20.8-5.8 7.6-5 13.9 2.2 21.1-4.7-2.6-11.9.1-7.7 8.8 2.3-5.5 7.1-4.2 8.1.5.7 3.3-1.3 7.1-5.7 7.9-3.5.7-9-1.8-13.5-11.2 2.5.1 4.7 1.3 7.5 3.3l-4.7-15.4c-1.2 4.4-2.7 7.2-4.3 8.7-1.1-3-.9-5.3 0-10.2l-9.5 3.4c5 6.9 9.9 16.7 14 33.5 14.8-2.1 30.8-3.2 47.7-3.2z"></path>
+                    </svg>
+                    GOV.UK
+                    <span class="service-name">PRISM - NHS Primary Care Intelligence</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Phase Banner -->
+    <div class="govuk-phase-banner">
+        <div class="govuk-phase-banner-content">
+            <strong class="govuk-tag">BETA</strong>
+            <span>This is a new service – your <a href="#" style="color: #1d70b8;">feedback</a> will help us to improve it.</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="govuk-nav">
+        <div class="govuk-nav-container">
+            <ul class="govuk-nav-list">
+                <li class="govuk-nav-item">
+                    <a class="govuk-nav-link active" href="#" onclick="switchView('dashboard'); return false;">Practice Dashboard</a>
+                </li>
+                <li class="govuk-nav-item">
+                    <a class="govuk-nav-link" href="#" onclick="switchView('patient'); return false;">Patient Portal</a>
+                </li>
+                <li class="govuk-nav-item">
+                    <a class="govuk-nav-link" href="#" onclick="switchView('analytics'); return false;">Performance Analytics</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="govuk-width-container govuk-main-wrapper">
+        <!-- Dashboard View -->
+        <div id="dashboard-view">
+            <div class="nhs-panel">
+                <h1 class="nhs-panel-heading">Practice Dashboard</h1>
+                <p class="nhs-panel-body">Real-time appointment optimization for Whitehall Medical Centre</p>
+            </div>
+
+            <div class="stat-container">
+                <div class="stat-card">
+                    <div class="stat-number" id="appointments-optimized">1,247</div>
+                    <div class="stat-label">Appointments Optimized Today</div>
+                    <div class="stat-change">↑ 15% from yesterday</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="time-saved">142h</div>
+                    <div class="stat-label">GP Time Saved</div>
+                    <div class="stat-change">↑ 23% efficiency gain</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="satisfaction">87%</div>
+                    <div class="stat-label">Patient Satisfaction</div>
+                    <div class="stat-change">↑ 8% improvement</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="continuity">68%</div>
+                    <div class="stat-label">Family Doctor Continuity</div>
+                    <div class="stat-change">↑ 12% increase</div>
+                </div>
+            </div>
+
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <div class="govuk-card govuk-card-white">
+                        <h2 class="govuk-heading-m">Recent AI-Matched Appointments</h2>
+                        <table class="govuk-table">
+                            <thead>
+                                <tr>
+                                    <th class="govuk-table-header">Patient</th>
+                                    <th class="govuk-table-header">Matched With</th>
+                                    <th class="govuk-table-header">Complexity</th>
+                                    <th class="govuk-table-header">Match Score</th>
+                                    <th class="govuk-table-header">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointments-table">
+                                <!-- Dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="govuk-grid-column-one-third">
+                    <div class="nhs-care-card">
+                        <div class="nhs-care-card-heading">
+                            AI Processing Status
+                        </div>
+                        <div class="nhs-care-card-content">
+                            <p><strong>System Status:</strong> <span class="govuk-tag govuk-tag-green">OPERATIONAL</span></p>
+                            <p><strong>Processing Speed:</strong> 2.3 seconds average</p>
+                            <p><strong>Match Accuracy:</strong> 98%</p>
+                            <p><strong>Queue Length:</strong> 3 patients</p>
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient View -->
+        <div id="patient-view" class="hidden">
+            <a href="#" class="govuk-back-link" onclick="switchView('dashboard'); return false;">Back to dashboard</a>
+            
+            <h1 class="govuk-heading-xl">Book an appointment</h1>
+            
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <div class="govuk-card govuk-card-white">
+                        <form onsubmit="submitAppointment(event)">
+                            <div class="govuk-form-group">
+                                <label class="govuk-label govuk-label-l" for="nhs-number">
+                                    NHS Number
+                                </label>
+                                <input class="govuk-input" id="nhs-number" name="nhs-number" type="text" value="943 476 5919" readonly>
+                            </div>
+
+                            <div class="govuk-form-group">
+                                <label class="govuk-label govuk-label-l" for="reason">
+                                    What do you need help with?
+                                </label>
+                                <select class="govuk-select" id="reason" name="reason">
+                                    <option>Ongoing diabetes management</option>
+                                    <option>New symptoms - chest pain</option>
+                                    <option>Mental health - anxiety</option>
+                                    <option>Routine check-up</option>
+                                    <option>Prescription renewal</option>
+                                    <option>Test results discussion</option>
+                                </select>
+                            </div>
+
+                            <div class="govuk-form-group">
+                                <label class="govuk-label govuk-label-l" for="symptoms">
+                                    Tell us more about your symptoms
+                                </label>
+                                <span class="govuk-hint">
+                                    Include how long you've had symptoms and how they affect you
+                                </span>
+                                <textarea class="govuk-textarea" id="symptoms" name="symptoms" rows="5"></textarea>
+                            </div>
+
+                            <div class="govuk-form-group">
+                                <label class="govuk-label govuk-label-l" for="preference">
+                                    Do you have a preferred healthcare professional?
+                                </label>
+                                <select class="govuk-select" id="preference" name="preference">
+                                    <option>Dr Sarah Mitchell (my regular GP)</option>
+                                    <option>Any available GP</option>
+                                    <option>Practice Nurse</option>
+                                    <option>No preference - whoever is best</option>
+                                </select>
+                            </div>
+
+                            <div class="govuk-form-group">
+                                <label class="govuk-label govuk-label-l" for="urgency">
+                                    How urgent is your appointment?
+                                </label>
+                                <select class="govuk-select" id="urgency" name="urgency">
+                                    <option>Emergency - need to be seen today</option>
+                                    <option>Urgent - within 48 hours</option>
+                                    <option>Soon - this week</option>
+                                    <option>Routine - within 2 weeks</option>
+                                </select>
+                            </div>
+
+                            <div class="govuk-warning-text">
+                                <span class="govuk-warning-text-icon">!</span>
+                                <strong>Important</strong><br>
+                                If you have chest pain, difficulty breathing, or severe bleeding, call 999 immediately
+                            </div>
+
+                            <button type="submit" class="govuk-button">Submit appointment request</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="govuk-grid-column-one-third">
+                    <div class="govuk-card">
+                        <h3 class="govuk-heading-m">Your medical record</h3>
+                        <dl class="govuk-summary-list">
+                            <div class="govuk-summary-list-row">
+                                <dt class="govuk-summary-list-key">Name</dt>
+                                <dd class="govuk-summary-list-value">Margaret Thompson</dd>
+                            </div>
+                            <div class="govuk-summary-list-row">
+                                <dt class="govuk-summary-list-key">Date of birth</dt>
+                                <dd class="govuk-summary-list-value">15 March 1957</dd>
+                            </div>
+                            <div class="govuk-summary-list-row">
+                                <dt class="govuk-summary-list-key">Regular GP</dt>
+                                <dd class="govuk-summary-list-value">Dr Sarah Mitchell</dd>
+                            </div>
+                            <div class="govuk-summary-list-row">
+                                <dt class="govuk-summary-list-key">Conditions</dt>
+                                <dd class="govuk-summary-list-value">Type 2 Diabetes<br>Hypertension<br>Osteoarthritis</dd>
+                            </div>
+                            <div class="govuk-summary-list-row">
+                                <dt class="govuk-summary-list-key">Last appointment</dt>
+                                <dd class="govuk-summary-list-value">2 weeks ago</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics View -->
+        <div id="analytics-view" class="hidden">
+            <h1 class="govuk-heading-xl">Performance Analytics</h1>
+            
+            <div class="govuk-inset-text">
+                These statistics show the performance of the PRISM system across all participating practices in the NHS England London region.
+            </div>
+
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-full">
+                    <div class="govuk-card govuk-card-white">
+                        <h2 class="govuk-heading-l">System Impact - Week of 9 September 2025</h2>
+                        
+                        <table class="govuk-table">
+                            <thead>
+                                <tr>
+                                    <th class="govuk-table-header">Metric</th>
+                                    <th class="govuk-table-header">This Week</th>
+                                    <th class="govuk-table-header">Last Week</th>
+                                    <th class="govuk-table-header">Change</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="govuk-table-cell">Total appointments optimized</td>
+                                    <td class="govuk-table-cell">47,832</td>
+                                    <td class="govuk-table-cell">42,156</td>
+                                    <td class="govuk-table-cell"><span class="govuk-tag govuk-tag-green">+13.5%</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="govuk-table-cell">GP hours saved</td>
+                                    <td class="govuk-table-cell">5,420</td>
+                                    <td class="govuk-table-cell">4,890</td>
+                                    <td class="govuk-table-cell"><span class="govuk-tag govuk-tag-green">+10.8%</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="govuk-table-cell">Average wait time</td>
+                                    <td class="govuk-table-cell">3.2 days</td>
+                                    <td class="govuk-table-cell">4.7 days</td>
+                                    <td class="govuk-table-cell"><span class="govuk-tag govuk-tag-green">-31.9%</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="govuk-table-cell">Patient satisfaction</td>
+                                    <td class="govuk-table-cell">87%</td>
+                                    <td class="govuk-table-cell">79%</td>
+                                    <td class="govuk-table-cell"><span class="govuk-tag govuk-tag-green">+8pp</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="govuk-table-cell">Cost savings</td>
+                                    <td class="govuk-table-cell">£1.85m</td>
+                                    <td class="govuk-table-cell">£1.62m</td>
+                                    <td class="govuk-table-cell"><span class="govuk-tag govuk-tag-green">+14.2%</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-one-half">
+                    <div class="nhs-care-card">
+                        <div class="nhs-care-card-heading">
+                            Key Achievement
+                        </div>
+                        <div class="nhs-care-card-content">
+                            <p><strong>2.3 million patients</strong> have been successfully matched using AI in the past 6 months.</p>
+                            <p>Family doctor continuity has increased from 45% to 68% for patients with chronic conditions.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="govuk-grid-column-one-half">
+                    <div class="nhs-care-card nhs-care-card-urgent">
+                        <div class="nhs-care-card-heading">
+                            Areas for Improvement
+                        </div>
+                        <div class="nhs-care-card-content">
+                            <p><strong>Digital exclusion:</strong> 12% of patients over 70 still prefer phone bookings.</p>
+                            <p><strong>Staff training:</strong> 23% of practices need additional support with the system.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Mock data
+        const patients = [
+            { name: "Margaret Thompson", age: 67, nhsNumber: "943 476 5919", conditions: ["Type 2 Diabetes", "Hypertension"], complexity: 85, preferredGP: "Dr Sarah Mitchell" },
+            { name: "James Wilson", age: 45, nhsNumber: "485 729 3847", conditions: ["Anxiety"], complexity: 45, preferredGP: "Dr Ahmed Patel" },
+            { name: "Emma Davies", age: 28, nhsNumber: "627 384 5910", conditions: [], complexity: 15, preferredGP: "Any GP" },
+            { name: "Robert Singh", age: 72, nhsNumber: "319 847 2856", conditions: ["COPD", "Heart Disease"], complexity: 95, preferredGP: "Dr Sarah Mitchell" },
+            { name: "Sophie Chen", age: 34, nhsNumber: "758 293 4861", conditions: ["Asthma"], complexity: 30, preferredGP: "Dr Lisa Wong" }
+        ];
+
+        const staff = [
+            { type: "GP", name: "Dr Sarah Mitchell", specialty: "Diabetes & Elderly Care" },
+            { type: "GP", name: "Dr Ahmed Patel", specialty: "Mental Health" },
+            { type: "Practice Nurse", name: "Susan Brown RN", specialty: "Chronic Disease" },
+            { type: "Nurse Practitioner", name: "Tom Hughes ANP", specialty: "Minor Illness" }
+        ];
+
+        // Generate appointment row
+        function generateAppointmentRow() {
+            const patient = patients[Math.floor(Math.random() * patients.length)];
+            const matchedStaff = patient.complexity > 70 ? staff[0] : staff[Math.floor(Math.random() * staff.length)];
+            const matchScore = patient.complexity > 70 ? 95 : 75 + Math.floor(Math.random() * 20);
+            
+            return `
+                <tr>
+                    <td class="govuk-table-cell">${patient.name}<br><small>NHS: ${patient.nhsNumber}</small></td>
+                    <td class="govuk-table-cell">${matchedStaff.name}<br><small>${matchedStaff.specialty}</small></td>
+                    <td class="govuk-table-cell">${patient.complexity}%</td>
+                    <td class="govuk-table-cell">${matchScore}%</td>
+                    <td class="govuk-table-cell"><span class="govuk-tag govuk-tag-green">CONFIRMED</span></td>
+                </tr>
+            `;
+        }
+
+        // Update appointments table
+        function updateAppointments() {
+            const table = document.getElementById('appointments-table');
+            const newRow = generateAppointmentRow();
+            table.insertAdjacentHTML('afterbegin', newRow);
+            
+            // Keep only last 5
+            while (table.children.length > 5) {
+                table.removeChild(table.lastChild);
+            }
+            
+            // Update stats
+            const appointments = parseInt(document.getElementById('appointments-optimized').textContent);
+            document.getElementById('appointments-optimized').textContent = appointments + 1;
+        }
+
+        // Switch views
+        function switchView(view) {
+            // Hide all views
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('patient-view').classList.add('hidden');
+            document.getElementById('analytics-view').classList.add('hidden');
+            
+            // Show selected view
+            document.getElementById(view + '-view').classList.remove('hidden');
+            
+            // Update nav
+            document.querySelectorAll('.govuk-nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Submit appointment
+        function submitAppointment(event) {
+            event.preventDefault();
+            
+            // Show success notification
+            const notification = document.createElement('div');
+            notification.className = 'govuk-notification-banner govuk-notification-banner-success';
+            notification.innerHTML = `
+                <h2>Success</h2>
+                <p>Your appointment has been confirmed with <strong>Dr Sarah Mitchell</strong></p>
+                <p>Date: Today at 3:30 PM</p>
+                <p>Match Score: 94% - Optimal match based on your diabetes management needs</p>
+            `;
+            
+            const form = event.target;
+            form.parentNode.insertBefore(notification, form);
+            
+            // Clear form
+            document.getElementById('symptoms').value = '';
+            
+            // Remove notification after 5 seconds
+            setTimeout(() => notification.remove(), 5000);
+        }
+
+        // Initialize
+        setInterval(updateAppointments, 4000);
+        updateAppointments();
+        updateAppointments();
+        updateAppointments();
+    </script>
+</body>
+</html>

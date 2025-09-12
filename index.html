@@ -90,6 +90,51 @@
             backdrop-filter: blur(10px);
         }
         
+        .hackathon-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .hackathon-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .nhs-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: #005eb8;
+            color: white;
+            padding: 20px 40px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            border: 2px solid #005eb8;
+            box-shadow: 0 4px 12px rgba(0, 94, 184, 0.3);
+            margin-bottom: 20px;
+        }
+        
+        .nhs-button:hover {
+            background: #003d82;
+            border-color: #003d82;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 94, 184, 0.4);
+        }
+        
         .header-image {
             max-width: 350px;
             width: 100%;
@@ -269,6 +314,14 @@
             <div class="team-info">
                 Team Godar Family: Kalen, Mir & Tony Godar
             </div>
+            <div style="margin-top: 20px;">
+                <a href="hackathons.html" class="hackathon-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    View All Hackathon Projects
+                </a>
+            </div>
             <img src="https://cdn.prod.website-files.com/63ab7699acaa43a23e3f306f/6831978f719b6e36d3fb1eea_ezgif.com-avif-to-webp-converter%20-%202025-05-24T115512.156%20(1).webp" alt="SoTA Weather Control & Geo-engineering Hackathon" class="header-image">
         </div>
         
@@ -307,6 +360,32 @@
                 class="game-frame"
                 title="Operation Stratosphere Game">
             </iframe>
+        </div>
+        
+        <!-- Spacing Between Games -->
+        <div class="spacing"></div>
+        
+        <!-- PRISM Prototype Section -->
+        <div class="game-section">
+            <div class="game-header">
+                <div class="game-title">
+                    PRISM: NHS Primary Care Intelligence System
+                </div>
+                <div class="game-description">
+                    A comprehensive prototype for the NHS Primary Care Intelligence System, designed to improve healthcare accessibility and data-driven decision making. This interactive prototype demonstrates innovative approaches to primary care management and patient data visualization. Part of the 10DS Hackathon September 2025 project focused on improving access to primary care.
+                </div>
+            </div>
+            <div style="text-align: center; padding: 40px 20px;">
+                <a href="prism-prototype.html" class="nhs-button">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    Launch PRISM Prototype
+                </a>
+                <p style="color: #64748b; font-size: 0.9rem; margin-top: 15px;">
+                    Interactive NHS Primary Care Intelligence System Demo
+                </p>
+            </div>
         </div>
     </div>
 </body>
