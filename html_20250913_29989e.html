@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GP-Triage AI - NHS Prototype</title>
+    <!-- NHS.UK frontend styles -->
+    <link href="https://www.nhs.uk/" rel="preconnect">
+    <link href="https://assets.nhs.uk/" rel="preconnect" crossorigin>
+    <link rel="stylesheet" href="https://www.nhs.uk/css/main.css" media="all">
+    <!-- GOV.UK styles -->
+    <link href="https://www.gov.uk/static/government-frontend/assets/application.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* NHS and GOV.UK compatible styling */
+        :root {
+            --nhs-blue: #005eb8;
+            --nhs-light-blue: #41b6e6;
+            --nhs-dark-blue: #003087;
+            --nhs-green: #009639;
+            --nhs-purple: #330072;
+            --nhs-emergency-red: #da291c;
+            --govuk-blue: #1d70b8;
+            --govuk-text: #0b0c0c;
+        }
+        
+        body {
+            font-family: "GDS Transport", Arial, sans-serif;
+            color: var(--govuk-text);
+            background-color: #f3f2f1;
+        }
+        
+        .nhsuk-header {
+            background-color: var(--nhs-blue);
+        }
+        
+        .nhsuk-header__container {
+            padding: 0 20px;
+            margin: 0 auto;
+            max-width: 1220px;
+            position: relative;
+        }
+        
+        .app-header__link {
+            display: inline-block;
+            padding: 20px 0;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 24px;
+        }
+        
+        .app-phase-banner {
+            border-bottom: 1px solid #b1b4b6;
+            padding: 10px 0;
+            background-color: white;
+        }
+        
+        .app-phase-banner__content {
+            max-width: 1220px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .app-phase-banner__content strong {
+            background-color: #ffdd00;
+            color: #0b0c0c;
+            padding: 2px 5px;
+            margin-right: 10px;
+        }
+        
+        .app-main-wrapper {
+            max-width: 1220px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .app-panel {
+            background-color: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #b1b4b6;
+        }
+        
+        .app-panel__title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 0 20px 0;
+            color: var(--nhs-dark-blue);
+        }
+        
+        .app-grid-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -15px;
+        }
+        
+        .app-grid-column-one-third {
+            width: 33.33%;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+        
+        .app-grid-column-two-thirds {
+            width: 66.66%;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+        
+        .app-grid-column-one-half {
+            width: 50%;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+        
+        .app-card {
+            background-color: white;
+            border: 1px solid #d8dde0;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .app-card__heading {
+            font-size: 19px;
+            margin: 0 0 15px 0;
+            font-weight: bold;
+        }
+        
+        .app-card__body {
+            font-size: 16px;
+        }
+        
+        .app-stat {
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .app-stat__figure {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 0;
+            color: var(--nhs-blue);
+        }
+        
+        .app-stat__label {
+            font-size: 16px;
+            margin: 0;
+            color: #4c6272;
+        }
+        
+        .app-patient-card {
+            border-left: 5px solid;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: white;
+        }
+        
+        .app-patient-card--urgent {
+            border-left-color: var(--nhs-emergency-red);
+            background-color: #fff5f5;
+        }
+        
+        .app-patient-card--high {
+            border-left-color: #ff9900;
+            background-color: #fff9e6;
+        }
+        
+        .app-patient-card--medium {
+            border-left-color: #ffcc00;
+            background-color: #fffee6;
+        }
+        
+        .app-patient-card--low {
+            border-left-color: var(--nhs-light-blue);
+            background-color: #f0f9ff;
+        }
+        
+        .app-button {
+            background-color: var(--govuk-blue);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .app-button:hover {
+            background-color: #0b4fa3;
+        }
+        
+        .app-form-group {
+            margin-bottom: 20px;
+        }
+        
+        .app-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .app-range-slider {
+            width: 100%;
+        }
+        
+        .app-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        .app-tag--urgent {
+            background-color: var(--nhs-emergency-red);
+            color: white;
+        }
+        
+        .app-tag--high {
+            background-color: #ff9900;
+            color: white;
+        }
+        
+        .app-tag--medium {
+            background-color: #ffcc00;
+            color: #0b0c0c;
+        }
+        
+        .app-tag--low {
+            background-color: var(--nhs-light-blue);
+            color: white;
+        }
+        
+        .app-simulation-panel {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border: 1px solid #a6c8e3;
+        }
+        
+        .app-simulation-results {
+            background-color: white;
+            padding: 15px;
+            border: 1px solid #b1b4b6;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .app-grid-column-one-third,
+            .app-grid-column-two-thirds,
+            .app-grid-column-one-half {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NHS Header -->
+    <header class="nhsuk-header" role="banner">
+        <div class="nhsuk-header__container">
+            <div class="nhsuk-header__logo">
+                <a class="app-header__link" href="#">
+                    <svg class="nhsuk-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 16" height="40" width="100">
+                        <path class="nhsuk-logo__background" fill="#005eb8" d="M0 0h40v16H0z"></path>
+                        <path class="nhsuk-logo__text" fill="#fff" d="M3.9 1.5h4.4l2.6 9h.1l1.8-9h3.3l-2.8 13H9l-2.7-9h-.1l-1.8 9H1.1M17.3 1.5h3.6l-1 4.9h4L25 1.5h3.5l-2.7 13h-3.5l1.1-5.6h-4.1l-1.2 5.6h-3.4M37.7 4.4c-.7-.3-1.6-.6-2.9-.6-1.4 0-2.5.5-2.5 1.8 0 1.2 1.2 1.7 2.7 2.2 1.5.5 3.1 1.1 3.1 3.1 0 2.2-1.8 3.3-4.3 3.3-1.4 0-2.5-.3-3.4-.7l.7-2.9c.8.4 1.8.7 3 .7 1.4 0 2.4-.5 2.4-1.7 0-1.1-1.1-1.7-2.6-2.1-1.5-.4-3.1-1-3.1-3 0-2.1 1.7-3.3 4-3.3 1.3 0 2.4.3 3.2.6"></path>
+                    </svg>
+                    <span style="vertical-align: middle; margin-left: 10px;">GP-Triage AI</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- GOV.UK Phase Banner -->
+    <div class="app-phase-banner">
+        <div class="app-phase-banner__content">
+            <strong class="app-tag">BETA</strong>
+            <span>This is a prototype service - your feedback will help us to improve it.</span>
+        </div>
+    </div>
+
+    <div class="app-main-wrapper">
+        <div class="app-panel">
+            <h1 class="app-panel__title">GP Practice Intelligent Triage System</h1>
+            
+            <div class="app-grid-row">
+                <div class="app-grid-column-one-third">
+                    <div class="app-card">
+                        <h2 class="app-card__heading">Patients waiting</h2>
+                        <div class="app-stat">
+                            <p class="app-stat__figure" id="total-waiting">42</p>
+                            <p class="app-stat__label">for appointments</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="app-grid-column-one-third">
+                    <div class="app-card">
+                        <h2 class="app-card__heading">Average wait time</h2>
+                        <div class="app-stat">
+                            <p class="app-stat__figure" id="avg-wait-time">18</p>
+                            <p class="app-stat__label">days for GP appointment</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="app-grid-column-one-third">
+                    <div class="app-card">
+                        <h2 class="app-card__heading">Patient satisfaction</h2>
+                        <div class="app-stat">
+                            <p class="app-stat__figure" id="satisfaction-rate">62%</p>
+                            <p class="app-stat__label">with current service</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="app-grid-row">
+                <div class="app-grid-column-one-half">
+                    <div class="app-card">
+                        <h2 class="app-card__heading">Wait times by staff type</h2>
+                        <div class="app-card__body">
+                            <canvas id="waitTimeChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="app-grid-column-one-half">
+                    <div class="app-card">
+                        <h2 class="app-card__heading">Staff availability</h2>
+                        <div class="app-card__body">
+                            <div class="app-form-group">
+                                <span>General Practitioners (GPs):</span>
+                                <span class="app-tag" style="background-color: #00703c; color: white;">4 available</span>
+                            </div>
+                            <div class="app-form-group">
+                                <span>Nurse Practitioners:</span>
+                                <span class="app-tag" style="background-color: #00703c; color: white;">3 available</span>
+                            </div>
+                            <div class="app-form-group">
+                                <span>Practice Nurses:</span>
+                                <span class="app-tag" style="background-color: #00703c; color: white;">2 available</span>
+                            </div>
+                            <div class="app-form-group">
+                                <span>Pharmacists:</span>
+                                <span class="app-tag" style="background-color: #00703c; color: white;">1 available</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="app-grid-row">
+            <div class="app-grid-column-two-thirds">
+                <div class="app-panel">
+                    <h2 class="app-panel__title">Patient queue - intelligent triage</h2>
+                    <button class="app-button" id="add-patient-btn">Simulate new patient request</button>
+                    
+                    <div id="patient-queue" style="margin-top: 20px;">
+                        <!-- Patient cards will be inserted here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="app-grid-column-one-third">
+                <div class="app-panel">
+                    <h2 class="app-panel__title">Resource simulation</h2>
+                    <p>Adjust resources to see impact on wait times and satisfaction</p>
+                    
+                    <div class="app-simulation-panel">
+                        <div class="app-form-group">
+                            <label class="app-label" for="gp-slider">Additional GPs: <span id="gp-value">0</span></label>
+                            <input type="range" class="app-range-slider" id="gp-slider" min="0" max="5" step="0.5" value="0">
+                        </div>
+                        
+                        <div class="app-form-group">
+                            <label class="app-label" for="nurse-slider">Additional Nurse Practitioners: <span id="nurse-value">0</span></label>
+                            <input type="range" class="app-range-slider" id="nurse-slider" min="0" max="5" step="0.5" value="0">
+                        </div>
+                        
+                        <div class="app-form-group">
+                            <label class="app-label" for="staff-mix-slider">Staff Mix Optimization: <span id="staff-mix-value">0%</span></label>
+                            <input type="range" class="app-range-slider" id="staff-mix-slider" min="0" max="100" value="0">
+                            <span style="font-size: 14px; color: #4c6272;">How effectively non-GP staff are utilized</span>
+                        </div>
+                        
+                        <button class="app-button" id="simulate-btn" style="width: 100%;">Run simulation</button>
+                    </div>
+                    
+                    <div class="app-simulation-results">
+                        <h3 style="margin-top: 0;">Projected outcomes</h3>
+                        <div class="app-form-group">
+                            <span>Avg. Wait Time:</span>
+                            <span id="projected-wait" style="float: right; font-weight: bold;">18 days</span>
+                        </div>
+                        <div class="app-form-group">
+                            <span>Patient Satisfaction:</span>
+                            <span id="projected-satisfaction" style="float: right; font-weight: bold;">62%</span>
+                        </div>
+                        <div class="app-form-group">
+                            <span>GP Utilization:</span>
+                            <span id="projected-utilization" style="float: right; font-weight: bold;">78%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="app-card" style="margin-top: 20px;">
+                        <h2 class="app-card__heading">Current allocation</h2>
+                        <div class="app-card__body">
+                            <canvas id="allocationChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data for the prototype
+        const mockPatients = [
+            {
+                id: 1,
+                name: "Eleanor Smith",
+                age: 78,
+                conditions: ["Diabetes", "Hypertension"],
+                reason: "New dizziness and unsteady gait",
+                clinicalScore: 92,
+                preferenceScore: 80,
+                vulnerability: "High",
+                recommendedStaff: "GP",
+                waitTime: 0,
+                priority: "urgent"
+            },
+            {
+                id: 2,
+                name: "Mark Taylor",
+                age: 28,
+                conditions: ["None"],
+                reason: "Follow-up on resolved sinus infection",
+                clinicalScore: 5,
+                preferenceScore: 30,
+                vulnerability: "Low",
+                recommendedStaff: "Practice Nurse",
+                waitTime: 3,
+                priority: "low"
+            },
+            {
+                id: 3,
+                name: "Susan Johnson",
+                age: 45,
+                conditions: ["Asthma", "Anxiety"],
+                reason: "Shortness of breath and tightness in chest",
+                clinicalScore: 75,
+                preferenceScore: 65,
+                vulnerability: "Medium",
+                recommendedStaff: "GP",
+                waitTime: 2,
+                priority: "high"
+            },
+            {
+                id: 4,
+                name: "David Brown",
+                age: 62,
+                conditions: ["COPD", "Hypertension"],
+                reason: "Annual medication review",
+                clinicalScore: 40,
+                preferenceScore: 45,
+                vulnerability: "Medium",
+                recommendedStaff: "Nurse Practitioner",
+                waitTime: 7,
+                priority: "medium"
+            },
+            {
+                id: 5,
+                name: "Aisha Khan",
+                age: 34,
+                conditions: ["Migraines"],
+                reason: "Migraine not responding to usual medication",
+                clinicalScore: 60,
+                preferenceScore: 70,
+                vulnerability: "Low",
+                recommendedStaff: "GP",
+                waitTime: 5,
+                priority: "high"
+            }
+        ];
+
+        const staffTypes = {
+            gp: { count: 4, waitTime: 18 },
+            nursePractitioner: { count: 3, waitTime: 7 },
+            practiceNurse: { count: 2, waitTime: 3 },
+            pharmacist: { count: 1, waitTime: 2 }
+        };
+
+        // Initialize charts
+        let waitTimeChart, allocationChart;
+
+        function initializeCharts() {
+            const waitTimeCtx = document.getElementById('waitTimeChart').getContext('2d');
+            waitTimeChart = new Chart(waitTimeCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['GP', 'Nurse Practitioner', 'Practice Nurse', 'Pharmacist'],
+                    datasets: [{
+                        label: 'Average Wait (days)',
+                        data: [18, 7, 3, 2],
+                        backgroundColor: [
+                            'rgba(0, 94, 184, 0.7)',
+                            'rgba(65, 182, 230, 0.7)',
+                            'rgba(0, 150, 57, 0.7)',
+                            'rgba(51, 0, 114, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(0, 94, 184)',
+                            'rgb(65, 182, 230)',
+                            'rgb(0, 150, 57)',
+                            'rgb(51, 0, 114)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Days'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            const allocationCtx = document.getElementById('allocationChart').getContext('2d');
+            allocationChart = new Chart(allocationCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['GP Recommended', 'Nurse Practitioner', 'Practice Nurse', 'Pharmacist'],
+                    datasets: [{
+                        data: [60, 20, 15, 5],
+                        backgroundColor: [
+                            'rgba(0, 94, 184, 0.7)',
+                            'rgba(65, 182, 230, 0.7)',
+                            'rgba(0, 150, 57, 0.7)',
+                            'rgba(51, 0, 114, 0.7)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render patient queue
+        function renderPatientQueue() {
+            const queueContainer = document.getElementById('patient-queue');
+            queueContainer.innerHTML = '';
+            
+            mockPatients.sort((a, b) => b.clinicalScore - a.clinicalScore);
+            
+            mockPatients.forEach(patient => {
+                const priorityClass = `app-patient-card--${patient.priority}`;
+                const priorityTag = `app-tag--${patient.priority}`;
+                const card = document.createElement('div');
+                card.className = `app-patient-card ${priorityClass}`;
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between;">
+                        <div style="flex: 1;">
+                            <h3 style="margin: 0 0 5px 0;">${patient.name}, ${patient.age}</h3>
+                            <p style="margin: 0 0 5px 0; font-size: 16px; color: #4c6272;">${patient.conditions.join(', ') || 'No known conditions'}</p>
+                            <p style="margin: 0 0 10px 0;">${patient.reason}</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="app-tag ${priorityTag}">${patient.priority.toUpperCase()}</span>
+                            <div style="margin-top: 5px;">
+                                <small style="color: #4c6272;">Clinical Score: ${patient.clinicalScore}%</small><br>
+                                <small style="color: #4c6272;">Preference: ${patient.preferenceScore}%</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <span style="font-weight: bold;">Recommended: ${patient.recommendedStaff}</span>
+                        <span style="color: #4c6272;">Vulnerability: ${patient.vulnerability}</span>
+                    </div>
+                `;
+                queueContainer.appendChild(card);
+            });
+        }
+
+        // Add new patient to the queue
+        function addNewPatient() {
+            const names = ["James Wilson", "Linda Patel", "Robert Davies", "Sarah O'Reilly", "Mohammed Khan", "Emily Chen"];
+            const reasons = [
+                "Persistent cough for 3 weeks",
+                "Joint pain and swelling",
+                "Skin rash on arms and chest",
+                "Medication review requested",
+                "Follow-up on blood test results",
+                "Annual diabetes check"
+            ];
+            const conditions = [
+                ["Hypertension"],
+                ["Asthma", "Eczema"],
+                ["Arthritis", "Osteoporosis"],
+                ["Diabetes", "High cholesterol"],
+                ["None"],
+                ["Hypothyroidism"]
+            ];
+            
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            const randomReason = reasons[Math.floor(Math.random() * reasons.length)];
+            const randomConditions = conditions[Math.floor(Math.random() * conditions.length)];
+            const randomAge = Math.floor(Math.random() * 60) + 18;
+            
+            // Calculate scores based on conditions and reason
+            let clinicalScore = Math.floor(Math.random() * 100);
+            let preferenceScore = Math.floor(Math.random() * 100);
+            let vulnerability = "Low";
+            
+            if (randomConditions.includes("Diabetes") || randomConditions.includes("Hypertension") || randomAge > 65) {
+                clinicalScore = Math.floor(Math.random() * 30) + 70;
+                vulnerability = "Medium";
+            }
+            
+            if (randomReason.includes("Persistent cough") || randomReason.includes("chest pain")) {
+                clinicalScore = Math.max(clinicalScore, 75);
+            }
+            
+            if (randomAge > 75) {
+                vulnerability = "High";
+            }
+            
+            let recommendedStaff = "Practice Nurse";
+            if (clinicalScore > 70) {
+                recommendedStaff = "GP";
+            } else if (clinicalScore > 40) {
+                recommendedStaff = "Nurse Practitioner";
+            }
+            
+            let priority = "low";
+            if (clinicalScore > 80) priority = "urgent";
+            else if (clinicalScore > 60) priority = "high";
+            else if (clinicalScore > 30) priority = "medium";
+            
+            const newPatient = {
+                id: mockPatients.length + 1,
+                name: randomName,
+                age: randomAge,
+                conditions: randomConditions,
+                reason: randomReason,
+                clinicalScore: clinicalScore,
+                preferenceScore: preferenceScore,
+                vulnerability: vulnerability,
+                recommendedStaff: recommendedStaff,
+                waitTime: 0,
+                priority: priority
+            };
+            
+            mockPatients.unshift(newPatient);
+            renderPatientQueue();
+            updateMetrics();
+        }
+
+        // Update metrics based on current state
+        function updateMetrics() {
+            // Calculate new metrics based on patient queue and staff
+            const totalWaiting = mockPatients.length;
+            const avgWaitTime = Math.round(mockPatients.reduce((sum, patient) => sum + patient.waitTime, 0) / mockPatients.length);
+            const satisfactionRate = Math.min(100, Math.max(50, 62 + Math.floor(Math.random() * 10) - 5));
+            const gpUtilization = Math.min(100, Math.max(60, 78 + Math.floor(Math.random() * 10) - 5));
+            
+            document.getElementById('total-waiting').textContent = totalWaiting;
+            document.getElementById('avg-wait-time').textContent = avgWaitTime;
+            document.getElementById('satisfaction-rate').textContent = `${satisfactionRate}%`;
+        }
+
+        // Run simulation based on slider values
+        function runSimulation() {
+            const additionalGPs = parseFloat(document.getElementById('gp-slider').value);
+            const additionalNurses = parseFloat(document.getElementById('nurse-slider').value);
+            const staffMixOptimization = parseInt(document.getElementById('staff-mix-slider').value);
+            
+            // Calculate projected outcomes based on inputs
+            const gpImpact = additionalGPs * 2.5;
+            const nurseImpact = additionalNurses * 1.5;
+            const optimizationImpact = staffMixOptimization * 0.2;
+            
+            const totalImpact = gpImpact + nurseImpact + optimizationImpact;
+            
+            const projectedWait = Math.max(1, Math.round(18 - totalImpact));
+            const projectedSatisfaction = Math.min(100, Math.round(62 + totalImpact * 0.8));
+            const projectedUtilization = Math.max(40, Math.round(78 - totalImpact * 0.9));
+            
+            document.getElementById('projected-wait').textContent = `${projectedWait} days`;
+            document.getElementById('projected-satisfaction').textContent = `${projectedSatisfaction}%`;
+            document.getElementById('projected-utilization').textContent = `${projectedUtilization}%`;
+            
+            // Update the wait time chart
+            waitTimeChart.data.datasets[0].data = [
+                Math.max(1, 18 - gpImpact),
+                Math.max(1, 7 - nurseImpact),
+                Math.max(0, 3 - nurseImpact * 0.5),
+                Math.max(0, 2 - nurseImpact * 0.3)
+            ];
+            waitTimeChart.update();
+        }
+
+        // Initialize the application
+        function initApp() {
+            initializeCharts();
+            renderPatientQueue();
+            updateMetrics();
+            
+            // Set up event listeners
+            document.getElementById('add-patient-btn').addEventListener('click', addNewPatient);
+            document.getElementById('simulate-btn').addEventListener('click', runSimulation);
+            
+            document.getElementById('gp-slider').addEventListener('input', function() {
+                document.getElementById('gp-value').textContent = this.value;
+            });
+            
+            document.getElementById('nurse-slider').addEventListener('input', function() {
+                document.getElementById('nurse-value').textContent = this.value;
+            });
+            
+            document.getElementById('staff-mix-slider').addEventListener('input', function() {
+                document.getElementById('staff-mix-value').textContent = `${this.value}%`;
+            });
+        }
+
+        // Start the application when the page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
